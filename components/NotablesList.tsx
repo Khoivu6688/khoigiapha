@@ -1,6 +1,7 @@
 "use client";
 
 import PersonCard from "@/components/PersonCard";
+import HeroImage from "@/components/HeroImage";
 import { Person } from "@/types";
 import { ArrowUpDown, Users } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -75,6 +76,13 @@ export default function NotablesList({
           Những thành viên nổi bật của dòng họ, có đóng góp quan trọng và được ghi nhận trong lịch sử gia tộc.
         </p>
       </div>
+
+      {/* Notable banner image */}
+      <HeroImage
+        src="/assets/images/notable.png"
+        alt="Danh nhân dòng họ"
+        className="mb-10"
+      />
 
       {/* Sort Controls */}
       <div className="mb-8 relative">
