@@ -1,5 +1,6 @@
 import DeleteMemberButton from "@/components/DeleteMemberButton";
 import MemberDetailContent from "@/components/MemberDetailContent";
+import { BranchProvider } from "@/components/BranchContext";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -85,12 +86,14 @@ export default async function MemberDetailPage({ params }: PageProps) {
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10 w-full flex-1">
         <div className="bg-white/60 rounded-2xl shadow-sm border border-stone-200/60 overflow-hidden hover:shadow-md transition-shadow duration-300">
-          <MemberDetailContent
-            person={person}
-            privateData={privateData}
-            isAdmin={isAdmin}
-            canEdit={canEdit}
-          />
+          <BranchProvider>
+            <MemberDetailContent
+              person={person}
+              privateData={privateData}
+              isAdmin={isAdmin}
+              canEdit={canEdit}
+            />
+          </BranchProvider>
         </div>
       </main>
     </div>

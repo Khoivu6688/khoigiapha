@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Filter, Search } from "lucide-react";
+import { useBranches } from "./BranchContext";
 
 export interface MembersBranchOption {
   id: number;
@@ -16,14 +17,11 @@ function toIntOrNull(v: string | null): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-export default function MembersBranchGenerationFilterBar({
-  branches,
-}: {
-  branches: MembersBranchOption[];
-}) {
+export default function MembersBranchGenerationFilterBar() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { branches } = useBranches();
 
   const currentQ = searchParams.get("q") ?? "";
   const currentBranchId = toIntOrNull(searchParams.get("branch_id"));
@@ -73,14 +71,15 @@ export default function MembersBranchGenerationFilterBar({
               value={currentBranchId ?? ""}
               onChange={(e) =>
                 pushParams({
-                  branch_id: e.target.value ? String(Number(e.target.value)) : null,
+                  branch_id: e.target.value
+                    ? String(Number(e.target.value))
+                    : null,
                 })
               }
             >
               <option value="">Tất cả chi</option>
               {branches.map((b) => (
                 <option key={b.id} value={b.id}>
-                  {b.code ? `${b.code} - ` : ""}
                   {b.name}
                 </option>
               ))}
@@ -94,7 +93,9 @@ export default function MembersBranchGenerationFilterBar({
               value={currentGeneration ?? ""}
               onChange={(e) =>
                 pushParams({
-                  generation: e.target.value ? String(Number(e.target.value)) : null,
+                  generation: e.target.value
+                    ? String(Number(e.target.value))
+                    : null,
                 })
               }
             >
@@ -136,4 +137,3 @@ export default function MembersBranchGenerationFilterBar({
     </div>
   );
 }
-

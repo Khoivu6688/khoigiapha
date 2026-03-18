@@ -8,12 +8,22 @@ import { useDashboard } from "./DashboardContext";
 import DefaultAvatar from "./DefaultAvatar";
 import { FemaleIcon, MaleIcon } from "./GenderIcons";
 import BranchName from "./BrancheName";
+import { useBranches } from "./BranchContext";
+import { Search } from "lucide-react";
+
 interface PersonCardProps {
   person: Person;
 }
 
 export default function PersonCard({ person }: PersonCardProps) {
   const { setMemberModalId } = useDashboard();
+  const { prefixes } = useBranches();
+
+  // Get prefix name from cache
+  const prefix = prefixes.find((p) => p.id === person.prefix_id);
+  const displayName = prefix
+    ? `${prefix.name} ${person.full_name}`
+    : person.full_name;
 
   const isDeceased = person.is_deceased;
   const isNotable = person.is_notable;
@@ -44,7 +54,7 @@ export default function PersonCard({ person }: PersonCardProps) {
               <Image
                 unoptimized
                 src={person.avatar_url}
-                alt={person.full_name}
+                alt={displayName}
                 width={64}
                 height={64}
                 className="h-full w-full object-cover"
@@ -75,7 +85,7 @@ export default function PersonCard({ person }: PersonCardProps) {
 
         <div className="flex-1 min-w-0">
           <h3 className="text-base text-left sm:text-lg font-bold text-stone-900 group-hover:text-amber-700 transition-colors truncate mb-1.5">
-            {person.full_name}
+            {displayName}
           </h3>
           <p className="text-sm font-medium text-stone-500 truncate flex items-center gap-1.5">
             <svg
@@ -159,6 +169,18 @@ export default function PersonCard({ person }: PersonCardProps) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Trace Lineage Button */}
+      <div className="px-2 pb-2">
+        <Link
+          href={`/dashboard/trace-lineage?personId=${person.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-amber-50 text-amber-700 text-xs font-medium rounded-lg hover:bg-amber-100 transition-colors border border-amber-200/60"
+        >
+          <Search className="size-3" />
+          Truy vết tổ tiên
+        </Link>
       </div>
     </button>
   );

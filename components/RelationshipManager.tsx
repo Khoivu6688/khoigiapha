@@ -4,6 +4,7 @@ import { DashboardContext, useDashboard } from "@/components/DashboardContext";
 import { Person, RelationshipType } from "@/types";
 import { formatDisplayDate } from "@/utils/dateHelpers";
 import { createClient } from "@/utils/supabase/client";
+import { useBranches } from "./BranchContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
@@ -33,7 +34,17 @@ export default function RelationshipManager({
   const supabase = createClient();
   const dashboardContext = useContext(DashboardContext);
   const { setMemberModalId } = useDashboard();
+  const { prefixes } = useBranches();
   const router = useRouter();
+
+  // Helper function to get display name with prefix
+  const getDisplayName = useCallback(
+    (person: Person) => {
+      const prefix = prefixes.find((p) => p.id === person.prefix_id);
+      return prefix ? `${prefix.name} ${person.full_name}` : person.full_name;
+    },
+    [prefixes],
+  );
 
   // If inside DashboardProvider → open modal; otherwise → navigate to full page
   const handlePersonClick = (id: string) => {
@@ -91,7 +102,7 @@ export default function RelationshipManager({
       personGender,
       relType: rel.type,
       relDirection: rel.direction,
-      targetPerson: rel.targetPerson.full_name,
+      targetPerson: getDisplayName(rel.targetPerson),
       targetGender: rel.targetPerson.gender,
       note: rel.note,
       noteLower: rel.note?.toLowerCase() || "",
@@ -194,11 +205,11 @@ export default function RelationshipManager({
 
             if (spousePerson && childPerson) {
               const spouseGender = spousePerson.gender;
-              let noteLabel = `Vợ/chồng của ${childPerson.full_name}`;
+              let noteLabel = `Vợ/chồng của ${getDisplayName(childPerson)}`;
               if (spouseGender === "female")
-                noteLabel = `Con dâu (vợ của ${childPerson.full_name})`;
+                noteLabel = `Con dâu (vợ của ${getDisplayName(childPerson)})`;
               if (spouseGender === "male")
-                noteLabel = `Con rể (chồng của ${childPerson.full_name})`;
+                noteLabel = `Con rể (chồng của ${getDisplayName(childPerson)})`;
 
               // Append existing marriage note if any
               if (m.note) noteLabel += ` - ${m.note}`;
@@ -547,7 +558,7 @@ export default function RelationshipManager({
                           <Image
                             unoptimized
                             src={rel.targetPerson.avatar_url}
-                            alt={rel.targetPerson.full_name}
+                            alt={getDisplayName(rel.targetPerson)}
                             className="h-full w-full object-cover"
                             width={32}
                             height={32}
@@ -558,7 +569,7 @@ export default function RelationshipManager({
                       </div>
                       <div className="flex flex-col">
                         <span className="text-stone-900 font-medium text-sm">
-                          {rel.targetPerson.full_name}
+                          {getDisplayName(rel.targetPerson)}
                         </span>
                         {(() => {
                           const displayNote = getDisplayNote(rel);
@@ -861,7 +872,7 @@ export default function RelationshipManager({
                 </option>
                 {groupByType("spouse").map((rel) => (
                   <option key={rel.id} value={rel.targetPerson.id}>
-                    {rel.targetPerson.full_name}{" "}
+                    {getDisplayName(rel.targetPerson)}{" "}
                     {(() => {
                       const displayNote = getDisplayNote(rel);
                       return displayNote ? `(${displayNote})` : "";

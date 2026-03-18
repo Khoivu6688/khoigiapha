@@ -2,6 +2,7 @@
 
 import MemberDetailContent from "@/components/MemberDetailContent";
 import MemberForm from "@/components/MemberForm";
+import { BranchProvider } from "@/components/BranchContext";
 import { Person } from "@/types";
 import { createClient } from "@/utils/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
@@ -253,12 +254,14 @@ export default function MemberDetailModal() {
             ) : person ? (
               /* ── DETAIL MODE ── */
               <div className="flex-1 overflow-y-auto custom-scrollbar">
-                <MemberDetailContent
-                  person={person}
-                  privateData={privateData}
-                  isAdmin={isAdmin}
-                  canEdit={canEdit}
-                />
+                <BranchProvider>
+                  <MemberDetailContent
+                    person={person}
+                    privateData={privateData}
+                    isAdmin={isAdmin}
+                    canEdit={canEdit}
+                  />
+                </BranchProvider>
               </div>
             ) : null}
           </motion.div>

@@ -23,6 +23,7 @@ export interface AdminUserData {
 
 export interface Person {
   id: string;
+  prefix_id:number | null;
   full_name: string;
   gender: Gender;
   birth_year: number | null;
@@ -73,6 +74,16 @@ export interface PersonWithDetails extends Person {
 export interface BranchOption {
   id: number
   name: string
+}
+
+export interface Branch {
+  id: number;
+  name: string;
+}
+
+export interface Prefix {
+  id: number;
+  name: string;
 }
 
 export interface SiteConfig {

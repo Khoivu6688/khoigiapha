@@ -4,6 +4,7 @@ import DefaultAvatar from "@/components/DefaultAvatar";
 import RelationshipManager from "@/components/RelationshipManager";
 import { Person } from "@/types";
 import BranchName from "./BrancheName";
+import { useBranches } from "./BranchContext";
 import {
   calculateAge,
   formatDisplayDate,
@@ -19,9 +20,11 @@ import {
   Leaf,
   MapPin,
   Phone,
+  Search,
   Users,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { FemaleIcon, MaleIcon } from "./GenderIcons";
 
@@ -39,9 +42,16 @@ export default function MemberDetailContent({
   canEdit = false,
 }: MemberDetailContentProps) {
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
+  const { prefixes } = useBranches();
   const fullPerson = { ...person, ...privateData };
   const note = (fullPerson.note as string) || "";
   const isNoteLong = note.length > 300;
+
+  // Get prefix name from cache
+  const prefix = prefixes.find((p) => p.id === person.prefix_id);
+  const displayName = prefix
+    ? `${prefix.name} ${person.full_name}`
+    : person.full_name;
 
   const isDeceased =
     person.is_deceased ||
@@ -99,7 +109,7 @@ export default function MemberDetailContent({
               <Image
                 unoptimized
                 src={person.avatar_url}
-                alt={person.full_name}
+                alt={displayName}
                 width={128}
                 height={128}
                 className="h-full w-full object-cover"
@@ -130,11 +140,11 @@ export default function MemberDetailContent({
       <div className="pt-16 sm:pt-20 px-6 sm:px-8 pb-8 relative z-10">
         <motion.div
           variants={itemVariants}
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
         >
           <div>
             <h1 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900 flex items-center gap-2 sm:gap-3 flex-wrap">
-              {fullPerson.full_name}
+              {displayName}
               {isDeceased && (
                 <span className="text-[10px] sm:text-xs font-sans font-bold text-stone-500 border border-stone-200/80 bg-stone-100/50 rounded-md px-2 py-0.5 whitespace-nowrap uppercase tracking-wider shadow-xs">
                   Đã mất
@@ -167,158 +177,28 @@ export default function MemberDetailContent({
               {person.generation != null && (
                 <span className="flex items-center gap-2 text-[10px] sm:text-xs font-sans font-bold rounded-md px-2 py-0.5 whitespace-nowrap shadow-xs border text-emerald-700 bg-emerald-50/60 border-emerald-200/60 uppercase tracking-wider">
                   <span>Đời thứ {person.generation}</span>
-                  <BranchName branchId={person.branch_id} />
                 </span>
               )}
             </h1>
             {person.other_names && (
-              <p className="mt-1.5 text-sm sm:text-base text-stone-600 font-medium italic">
-                Tên khác:{" "}
+              <p className="text-stone-600 mt-2 text-sm italic">
+                Tên gọi khác:{" "}
                 <span className="font-semibold not-italic text-stone-700">
                   {person.other_names}
                 </span>
               </p>
             )}
-
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-              {/* Birth Card */}
-              <motion.div
-                variants={itemVariants}
-                className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-stone-200/60 shadow-sm transition-all hover:shadow-md hover:border-amber-200/60"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></span>
-                    <h3 className="text-[11px] font-bold text-stone-400 uppercase tracking-widest">
-                      Sinh
-                    </h3>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {person.birth_year &&
-                      getZodiacAnimal(
-                        person.birth_year,
-                        person.birth_month,
-                        person.birth_day,
-                      ) && (
-                        <span className="text-[10px] font-sans font-bold text-rose-700 bg-rose-50 border border-rose-200/60 rounded-md px-1.5 py-0.5 whitespace-nowrap shadow-xs tracking-wider">
-                          Tuổi{" "}
-                          {getZodiacAnimal(
-                            person.birth_year,
-                            person.birth_month,
-                            person.birth_day,
-                          )}
-                        </span>
-                      )}
-                    {person.birth_day &&
-                      person.birth_month &&
-                      getZodiacSign(person.birth_day, person.birth_month) && (
-                        <span className="text-[10px] font-sans font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 rounded-md px-1.5 py-0.5 whitespace-nowrap shadow-xs tracking-wider">
-                          {getZodiacSign(person.birth_day, person.birth_month)}
-                        </span>
-                      )}
-                  </div>
-                </div>
-                <div className="space-y-1.5 pl-4 border-l-2 border-stone-100">
-                  <p className="text-stone-800 font-semibold text-sm sm:text-base">
-                    {formatDisplayDate(
-                      person.birth_year,
-                      person.birth_month,
-                      person.birth_day,
-                    )}
-                  </p>
-                  {(person.birth_year ||
-                    person.birth_month ||
-                    person.birth_day) && (
-                    <p className="text-sm font-medium text-stone-500 flex items-center gap-1.5">
-                      <span className="text-[10px] border border-stone-200/60 bg-stone-50/80 rounded px-1.5 py-0.5">
-                        Âm lịch
-                      </span>
-                      {getLunarDateString(
-                        person.birth_year,
-                        person.birth_month,
-                        person.birth_day,
-                      ) || "Chưa rõ"}
-                    </p>
-                  )}
-                </div>
-              </motion.div>
-
-              {/* Death Card */}
-              {isDeceased && (
-                <motion.div
-                  variants={itemVariants}
-                  className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-stone-200/60 shadow-sm transition-all hover:shadow-md hover:border-amber-200/60"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="size-2 rounded-full bg-stone-400 shadow-[0_0_8px_rgba(156,163,175,0.5)]"></span>
-                    <h3 className="text-[11px] font-bold text-stone-400 uppercase tracking-widest">
-                      Mất
-                    </h3>
-                  </div>
-                  <div className="space-y-1.5 pl-4 border-l-2 border-stone-100">
-                    <p className="text-stone-800 font-semibold text-sm sm:text-base">
-                      {formatDisplayDate(
-                        person.death_year,
-                        person.death_month,
-                        person.death_day,
-                      )}
-                    </p>
-                    {(person.death_year ||
-                      person.death_month ||
-                      person.death_day) && (
-                      <p className="text-xs font-medium text-stone-500 flex items-center gap-1.5">
-                        <span className="text-[10px] border border-stone-200/60 bg-stone-50/80 rounded px-1.5 py-0.5">
-                          Âm lịch
-                        </span>
-                        {getLunarDateString(
-                          person.death_year,
-                          person.death_month,
-                          person.death_day,
-                        ) || "Chưa rõ"}
-                      </p>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Age Card */}
-              {(() => {
-                const ageData = calculateAge(
-                  person.birth_year,
-                  person.death_year,
-                  person.is_deceased,
-                );
-                if (!ageData) return null;
-                return (
-                  <motion.div
-                    variants={itemVariants}
-                    className="bg-linear-to-br from-amber-50 to-orange-50/40 rounded-2xl p-4 border border-amber-200/50 shadow-sm transition-all hover:shadow-md flex flex-col justify-center relative overflow-hidden"
-                  >
-                    <Leaf className="absolute -bottom-4 -right-4 w-20 h-20 text-amber-500/10 rotate-12" />
-                    <div className="flex items-center gap-2 mb-1.5 relative z-10">
-                      <span
-                        className={`size-2 rounded-full ${ageData.isDeceased ? "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]" : "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"}`}
-                      ></span>
-                      <p className="text-[11px] font-bold text-amber-800/60 uppercase tracking-widest">
-                        {ageData.isDeceased
-                          ? (ageData.age != null && ageData.age >= 60)
-                            ? "Hưởng thọ"
-                            : "Hưởng dương"
-                          : "Tuổi"}
-                      </p>
-                    </div>
-                    <div className="pl-4 relative z-10">
-                      <p className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-linear-to-br from-amber-700 to-amber-900 tracking-tight">
-                        {ageData.age ?? "?"}
-                        <span className="text-xs sm:text-sm font-bold text-amber-700/60 ml-1.5 uppercase tracking-wider">
-                          tuổi
-                        </span>
-                      </p>
-                    </div>
-                  </motion.div>
-                );
-              })()}
-            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/dashboard/trace-lineage?personId=${person.id}`}
+              className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors shadow-sm"
+            >
+              <Search className="size-4" />
+              Truy vết tổ tiên
+            </Link>
           </div>
         </motion.div>
 
@@ -381,12 +261,13 @@ export default function MemberDetailContent({
               </div>
             </motion.section>
 
+            {/* Relationships Section */}
             <motion.section variants={itemVariants}>
               <h2 className="text-base sm:text-lg font-bold text-stone-800 mb-4 flex items-center gap-2">
                 <Users className="size-5 text-amber-600" />
-                Gia đình
+                Quan hệ gia đình
               </h2>
-              <div className="bg-white/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-stone-200/60 shadow-sm relative z-0">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-stone-200/60 shadow-sm">
                 <RelationshipManager
                   personId={person.id}
                   isAdmin={isAdmin}
@@ -397,65 +278,179 @@ export default function MemberDetailContent({
             </motion.section>
           </div>
 
-          {/* Sidebar / Private Info */}
+          {/* Sidebar */}
           <div className="space-y-6">
-            <motion.div variants={itemVariants}>
-              {isAdmin ? (
-                <div className="bg-stone-50 p-5 sm:p-6 rounded-2xl border border-stone-200/80 shadow-sm">
-                  <h3 className="font-bold text-stone-900 mb-4 flex items-center gap-2 text-sm sm:text-base border-b border-stone-200/60 pb-3">
-                    <span className="bg-amber-100/80 text-amber-700 p-1.5 rounded-lg border border-amber-200/50">
-                      🔒
-                    </span>
-                    Thông tin liên hệ
+            {/* Birth Card */}
+            <motion.div
+              variants={itemVariants}
+              className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-stone-200/60 shadow-sm transition-all hover:shadow-md hover:border-amber-200/60"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></span>
+                  <h3 className="text-[11px] font-bold text-stone-400 uppercase tracking-widest">
+                    Sinh
                   </h3>
-                  <dl className="space-y-4 text-sm sm:text-base">
-                    <div>
-                      <dt className="text-[11px] font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                        <Phone className="w-3.5 h-3.5" /> Số điện thoại
-                      </dt>
-                      <dd className="text-stone-900 font-medium bg-white px-3 py-2 rounded-lg border border-stone-200/60 shadow-xs">
-                        {(fullPerson.phone_number as string) || (
-                          <span className="text-stone-400 font-normal">
-                            Chưa cập nhật
-                          </span>
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-[11px] font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                        <Briefcase className="w-3.5 h-3.5" /> Nghề nghiệp
-                      </dt>
-                      <dd className="text-stone-900 font-medium bg-white px-3 py-2 rounded-lg border border-stone-200/60 shadow-xs">
-                        {(fullPerson.occupation as string) || (
-                          <span className="text-stone-400 font-normal">
-                            Chưa cập nhật
-                          </span>
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-[11px] font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                        <MapPin className="w-3.5 h-3.5" /> Nơi ở hiện tại
-                      </dt>
-                      <dd className="text-stone-900 font-medium bg-white px-3 py-2 rounded-lg border border-stone-200/60 shadow-xs">
-                        {(fullPerson.current_residence as string) || (
-                          <span className="text-stone-400 font-normal">
-                            Chưa cập nhật
-                          </span>
-                        )}
-                      </dd>
-                    </div>
-                  </dl>
                 </div>
-              ) : (
-                <div className="bg-stone-50/50 p-5 rounded-2xl border border-stone-200 border-dashed flex flex-col items-center justify-center text-center gap-2">
-                  <span className="text-2xl opacity-50">🔒</span>
-                  <p className="text-sm font-medium text-stone-500">
-                    Thông tin liên hệ chỉ hiển thị với Quản trị viên.
+                <div className="flex items-center gap-1">
+                  {person.birth_year &&
+                    getZodiacAnimal(
+                      person.birth_year,
+                      person.birth_month,
+                      person.birth_day,
+                    ) && (
+                      <span className="text-[10px] font-sans font-bold text-rose-700 bg-rose-50 border border-rose-200/60 rounded-md px-1.5 py-0.5 whitespace-nowrap shadow-xs tracking-wider">
+                        Tuổi{" "}
+                        {getZodiacAnimal(
+                          person.birth_year,
+                          person.birth_month,
+                          person.birth_day,
+                        )}
+                      </span>
+                    )}
+                  {person.birth_day &&
+                    person.birth_month &&
+                    getZodiacSign(person.birth_day, person.birth_month) && (
+                      <span className="text-[10px] font-sans font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 rounded-md px-1.5 py-0.5 whitespace-nowrap shadow-xs tracking-wider">
+                        {getZodiacSign(person.birth_day, person.birth_month)}
+                      </span>
+                    )}
+                </div>
+              </div>
+              <div className="space-y-1.5 pl-4 border-l-2 border-stone-100">
+                <p className="text-stone-800 font-semibold text-sm sm:text-base">
+                  {formatDisplayDate(
+                    person.birth_year,
+                    person.birth_month,
+                    person.birth_day,
+                  )}
+                </p>
+                {(person.birth_year ||
+                  person.birth_month ||
+                  person.birth_day) && (
+                  <p className="text-sm font-medium text-stone-500 flex items-center gap-1.5">
+                    <span className="text-[10px] border border-stone-200/60 bg-stone-50/80 rounded px-1.5 py-0.5">
+                      Âm lịch
+                    </span>
+                    {getLunarDateString(
+                      person.birth_year,
+                      person.birth_month,
+                      person.birth_day,
+                    ) || "Chưa rõ"}
                   </p>
-                </div>
-              )}
+                )}
+              </div>
             </motion.div>
+
+            {/* Death Card */}
+            {isDeceased && (
+              <motion.div
+                variants={itemVariants}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-stone-200/60 shadow-sm transition-all hover:shadow-md hover:border-amber-200/60"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="size-2 rounded-full bg-stone-400 shadow-[0_0_8px_rgba(156,163,175,0.5)]"></span>
+                  <h3 className="text-[11px] font-bold text-stone-400 uppercase tracking-widest">
+                    Mất
+                  </h3>
+                </div>
+                <div className="space-y-1.5 pl-4 border-l-2 border-stone-100">
+                  <p className="text-stone-800 font-semibold text-sm sm:text-base">
+                    {formatDisplayDate(
+                      person.death_year,
+                      person.death_month,
+                      person.death_day,
+                    )}
+                  </p>
+                  {(person.death_year ||
+                    person.death_month ||
+                    person.death_day) && (
+                    <p className="text-xs font-medium text-stone-500 flex items-center gap-1.5">
+                      <span className="text-[10px] border border-stone-200/60 bg-stone-50/80 rounded px-1.5 py-0.5">
+                        Âm lịch
+                      </span>
+                      {getLunarDateString(
+                        person.death_year,
+                        person.death_month,
+                        person.death_day,
+                      ) || "Chưa rõ"}
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Age Card */}
+            {(() => {
+              const ageData = calculateAge(
+                person.birth_year,
+                person.death_year,
+                person.is_deceased,
+              );
+              if (!ageData) return null;
+              return (
+                <motion.div
+                  variants={itemVariants}
+                  className="bg-linear-to-br from-amber-50 to-orange-50/40 rounded-2xl p-4 border border-amber-200/50 shadow-sm transition-all hover:shadow-md flex flex-col justify-center relative overflow-hidden"
+                >
+                  <Leaf className="absolute -bottom-4 -right-4 w-20 h-20 text-amber-500/10 rotate-12" />
+                  <div className="flex items-center gap-2 mb-1.5 relative z-10">
+                    <span
+                      className={`size-2 rounded-full ${ageData.isDeceased ? "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]" : "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"}`}
+                    ></span>
+                    <p className="text-[11px] font-bold text-amber-800/60 uppercase tracking-widest">
+                      {ageData.isDeceased
+                        ? ageData.age != null && ageData.age >= 60
+                          ? "Hưởng thọ"
+                          : "Hưởng dương"
+                        : "Tuổi"}
+                    </p>
+                  </div>
+                  <div className="pl-4 relative z-10">
+                    <p className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-linear-to-br from-amber-700 to-amber-900 tracking-tight">
+                      {ageData.age ?? "?"}
+                      <span className="text-xs sm:text-sm font-bold text-amber-700/60 ml-1.5 uppercase tracking-wider">
+                        tuổi
+                      </span>
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })()}
+
+            {/* Contact Info */}
+            {(fullPerson.phone_number ||
+              fullPerson.occupation ||
+              fullPerson.current_residence) && (
+              <motion.div
+                variants={itemVariants}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-stone-200/60 shadow-sm"
+              >
+                <h3 className="text-[11px] font-bold text-stone-400 uppercase tracking-widest mb-3">
+                  Thông tin liên hệ
+                </h3>
+                <div className="space-y-2">
+                  {fullPerson.phone_number && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Phone className="size-4 text-stone-400" />
+                      <span className="text-stone-700">{fullPerson.phone_number}</span>
+                    </div>
+                  )}
+                  {fullPerson.occupation && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Briefcase className="size-4 text-stone-400" />
+                      <span className="text-stone-700">{fullPerson.occupation}</span>
+                    </div>
+                  )}
+                  {fullPerson.current_residence && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="size-4 text-stone-400" />
+                      <span className="text-stone-700">{fullPerson.current_residence}</span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>

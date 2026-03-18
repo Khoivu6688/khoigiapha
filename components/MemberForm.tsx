@@ -18,7 +18,7 @@ import {
   User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface MemberFormProps {
   initialData?: Person;
@@ -41,11 +41,17 @@ export default function MemberForm({
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [prefixes, setPrefixes] = useState<Array<{ id: number; name: string }>>(
+    [],
+  );
 
   // Form states
   const [fullName, setFullName] = useState(initialData?.full_name || "");
   const [otherNames, setOtherNames] = useState(initialData?.other_names || "");
   const [gender, setGender] = useState<Gender>(initialData?.gender || "male");
+  const [prefixId, setPrefixId] = useState<number | null>(
+    initialData?.prefix_id || null,
+  );
   const [birthYear, setBirthYear] = useState<number | "">(
     initialData?.birth_year || "",
   );
@@ -103,6 +109,24 @@ export default function MemberForm({
   const [currentResidence, setCurrentResidence] = useState(
     initialData?.current_residence || "",
   );
+
+  // Fetch prefixes on component mount
+  useEffect(() => {
+    const fetchPrefixes = async () => {
+      const { data, error } = await supabase
+        .from("prefix")
+        .select("id, name")
+        .order("id");
+
+      if (error) {
+        console.error("Error fetching prefixes:", error);
+      } else {
+        setPrefixes(data || []);
+      }
+    };
+
+    fetchPrefixes();
+  }, [supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -176,6 +200,7 @@ export default function MemberForm({
       const personData = {
         full_name: fullName,
         gender,
+        prefix_id: prefixId,
         birth_year: birthYear === "" ? null : Number(birthYear),
         birth_month: birthMonth === "" ? null : Number(birthMonth),
         birth_day: birthDay === "" ? null : Number(birthDay),
@@ -273,6 +298,31 @@ export default function MemberForm({
           Thông tin chung
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="md:col-span-1">
+            <label className="block text-sm font-semibold text-stone-700 mb-1.5">
+              Danh xưng
+            </label>
+            <div className="relative">
+              <select
+                value={prefixId || ""}
+                onChange={(e) =>
+                  setPrefixId(e.target.value ? Number(e.target.value) : null)
+                }
+                className={`${inputClasses} appearance-none`}
+              >
+                <option value="">Chọn danh xưng...</option>
+                {prefixes.map((prefix) => (
+                  <option key={prefix.id} value={prefix.id}>
+                    {prefix.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-stone-500">
+                <Settings2 className="size-4" />
+              </div>
+            </div>
+          </div>
+
           <div className="md:col-span-1">
             <label className="block text-sm font-semibold text-stone-700 mb-1.5">
               Họ và Tên <span className="text-red-500">*</span>

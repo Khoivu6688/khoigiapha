@@ -1,42 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { useBranches } from "./BranchContext";
 
 interface Props {
   branchId: number | null;
 }
 
 export default function BranchName({ branchId }: Props) {
-  const [name, setName] = useState<string | null>(null);
-  const supabase = createClient();
+  const { branches, loading, error } = useBranches();
 
-  useEffect(() => {
-    if (!branchId) {
-      setName(null);
-      return;
-    }
+  if (loading) {
+    return <span className="text-sm text-stone-400">Loading...</span>;
+  }
 
-    let isMounted = true;
+  if (error) {
+    return <span className="text-sm text-rose-600">Error</span>;
+  }
 
-    const fetchBranch = async () => {
-      const { data, error } = await supabase
-        .from("branches")
-        .select("name")
-        .eq("id", branchId)
-        .single();
+  const branch = branches.find((b) => b.id === branchId);
 
-      if (!error && isMounted) {
-        setName(data?.name ?? null);
-      }
-    };
-
-    fetchBranch();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [branchId]);
-
-  return <span className="text-sm text-inherit">{name ?? "No Branch"}</span>;
+  return (
+    <span className="text-sm text-inherit">{branch?.name ?? "No Branch"}</span>
+  );
 }

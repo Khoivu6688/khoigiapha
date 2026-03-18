@@ -1,6 +1,7 @@
 import { DashboardProvider } from "@/components/DashboardContext";
 import MemberDetailModal from "@/components/MemberDetailModal";
 import PersonCard from "@/components/PersonCard";
+import { BranchProvider } from "@/components/BranchContext";
 import MembersBranchGenerationFilterBar, {
   MembersBranchOption,
 } from "@/components/MembersBranchGenerationFilterBar";
@@ -58,13 +59,6 @@ export default async function MembersPage({
     .single();
 
   const canEdit = profile?.role === "admin" || profile?.role === "editor";
-
-  const { data: branchesData } = await supabase
-    .from("branches")
-    .select("id, name, code")
-    .order("code", { ascending: true, nullsFirst: true });
-
-  const branches = (branchesData ?? []) as MembersBranchOption[];
 
   let personsQuery = supabase.from("persons").select("*", { count: "exact" });
 
@@ -137,93 +131,94 @@ export default async function MembersPage({
   };
 
   return (
-    <DashboardProvider>
-      <main className="flex-1 overflow-auto bg-stone-50/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-start justify-between gap-4 mb-2">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900">
-                Lọc thành viên theo chi / thế hệ
-              </h1>
-              <p className="text-sm text-stone-600 mt-1">
-                Tổng: <span className="font-semibold">{total}</span> thành viên
-                {branchId != null && (
-                  <span className="ml-2 text-stone-500">(đã lọc chi)</span>
-                )}
-                {generation != null && (
-                  <span className="ml-2 text-stone-500">(đã lọc đời)</span>
-                )}
-              </p>
+    <BranchProvider>
+      <DashboardProvider>
+        <main className="flex-1 overflow-auto bg-stone-50/50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900">
+                  Lọc thành viên theo chi / thế hệ
+                </h1>
+                <p className="text-sm text-stone-600 mt-1">
+                  Tổng: <span className="font-semibold">{total}</span> thành viên
+                  {branchId != null && (
+                    <span className="ml-2 text-stone-500">(đã lọc chi)</span>
+                  )}
+                  {generation != null && (
+                    <span className="ml-2 text-stone-500">(đã lọc đời)</span>
+                  )}
+                </p>
+              </div>
+              {canEdit && (
+                <a href="/dashboard/members/new" className="btn-primary">
+                  Thêm thành viên
+                </a>
+              )}
             </div>
-            {canEdit && (
-              <a href="/dashboard/members/new" className="btn-primary">
-                Thêm thành viên
-              </a>
+
+            <MembersBranchGenerationFilterBar />
+
+            {persons && persons.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {persons.map((p) => (
+                  <PersonCard key={p.id} person={p} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-stone-400 italic">
+                Không tìm thấy thành viên phù hợp.
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8">
+                <a
+                  href={buildPageHref(Math.max(1, page - 1))}
+                  aria-disabled={page === 1}
+                  className={`px-3 py-2 border border-stone-300 rounded-lg transition-colors ${
+                    page === 1
+                      ? "opacity-50 pointer-events-none"
+                      : "hover:bg-stone-50"
+                  }`}
+                >
+                  Trước
+                </a>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (p) => (
+                      <a
+                        key={p}
+                        href={buildPageHref(p)}
+                        className={`w-10 h-10 rounded-lg border transition-colors flex items-center justify-center ${
+                          page === p
+                            ? "bg-amber-500 text-white border-amber-500"
+                            : "border-stone-300 hover:bg-stone-50 text-stone-700"
+                        }`}
+                      >
+                        {p}
+                      </a>
+                    ),
+                  )}
+                </div>
+                <a
+                  href={buildPageHref(Math.min(totalPages, page + 1))}
+                  aria-disabled={page === totalPages}
+                  className={`px-3 py-2 border border-stone-300 rounded-lg transition-colors ${
+                    page === totalPages
+                      ? "opacity-50 pointer-events-none"
+                      : "hover:bg-stone-50"
+                  }`}
+                >
+                  Sau
+                </a>
+              </div>
             )}
           </div>
-
-          <MembersBranchGenerationFilterBar branches={branches} />
-
-          {persons && persons.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {persons.map((p) => (
-                <PersonCard key={p.id} person={p} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 text-stone-400 italic">
-              Không tìm thấy thành viên phù hợp.
-            </div>
-          )}
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
-              <a
-                href={buildPageHref(Math.max(1, page - 1))}
-                aria-disabled={page === 1}
-                className={`px-3 py-2 border border-stone-300 rounded-lg transition-colors ${
-                  page === 1
-                    ? "opacity-50 pointer-events-none"
-                    : "hover:bg-stone-50"
-                }`}
-              >
-                Trước
-              </a>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (p) => (
-                    <a
-                      key={p}
-                      href={buildPageHref(p)}
-                      className={`w-10 h-10 rounded-lg border transition-colors flex items-center justify-center ${
-                        page === p
-                          ? "bg-amber-500 text-white border-amber-500"
-                          : "border-stone-300 hover:bg-stone-50 text-stone-700"
-                      }`}
-                    >
-                      {p}
-                    </a>
-                  ),
-                )}
-              </div>
-              <a
-                href={buildPageHref(Math.min(totalPages, page + 1))}
-                aria-disabled={page === totalPages}
-                className={`px-3 py-2 border border-stone-300 rounded-lg transition-colors ${
-                  page === totalPages
-                    ? "opacity-50 pointer-events-none"
-                    : "hover:bg-stone-50"
-                }`}
-              >
-                Sau
-              </a>
-            </div>
-          )}
-        </div>
-      </main>
-
-      <MemberDetailModal />
-    </DashboardProvider>
+        </main>
+        <MemberDetailModal />
+      </DashboardProvider>
+    </BranchProvider>
   );
 }
