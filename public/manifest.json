@@ -1,6 +1,6 @@
 {
-  "name": "Gia Phả Họ Nguyễn Bỉm Sơn",
-  "short_name": "Gia Phả Nguyễn Bỉm Sơn",
+  "name": "Gia phả họ Vũ Bá - Thái Bình",
+  "short_name": "Gia phả Vũ Bá",
   "description": "Nền tảng gia phả hiện đại & bảo mật. Gìn giữ và lưu truyền những giá trị, cội nguồn và truyền thống tốt đẹp của dòng họ cho các thế hệ mai sau.",
   "start_url": "/",
   "display": "standalone",
@@ -64,7 +64,7 @@
     {
       "name": "Xem Gia Phả",
       "short_name": "Gia Phả",
-      "description": "Xem cây gia phả họ Nguyễn Bỉm Sơn",
+      "description": "Xem cây gia phả họ Vũ Bá - Thái Bình",
       "url": "/dashboard?view=list",
       "icons": [
         {

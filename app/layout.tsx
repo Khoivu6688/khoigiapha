@@ -13,16 +13,16 @@ const playfair = Playfair_Display({
 });
 export const metadata: Metadata = {
   title: {
-    default: "GIA PHẢ HỌ NGUYỄN BỈM SƠN",
-    template: "%s | GIA PHẢ HỌ NGUYỄN BỈM SƠN",
+    default: "Gia phả họ Vũ Bá - Thái Bình",
+    template: "%s | Gia phả họ Vũ Bá - Thái Bình",
   },
   description:
-    "GIA PHẢ HỌ NGUYỄN BỈM SƠN - Nền tảng gia phả hiện đại & bảo mật. Gìn giữ và lưu truyền những giá trị, cội nguồn và truyền thống tốt đẹp của dòng họ cho các thế hệ mai sau.",
+    "Gia phả họ Vũ Bá - Thái Bình - Nền tảng gia phả hiện đại & bảo mật. Gìn giữ và lưu truyền những giá trị, cội nguồn và truyền thống tốt đẹp của dòng họ cho các thế hệ mai sau.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Gia Phả Nguyễn Bỉm Sơn",
+    title: "Gia phả họ Vũ Bá - Thái Bình",
   },
   formatDetection: {
     email: false,
@@ -45,10 +45,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta
           name="apple-mobile-web-app-title"
-          content="Gia Phả Nguyễn Bỉm Sơn"
+          content="Gia phả họ Vũ Bá - Thái Bình"
         />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="Gia Phả Nguyễn Bỉm Sơn" />
+        <meta name="application-name" content="Gia phả họ Vũ Bá - Thái Bình" />
         <meta name="theme-color" content="#f59e0b" />
       </head>
       <body
