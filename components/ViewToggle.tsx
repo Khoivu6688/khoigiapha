@@ -11,7 +11,6 @@ import {
   Users,
 } from "lucide-react";
 import { useDashboard } from "./DashboardContext";
-import { useRouter } from "next/navigation";
 
 // Get rootId from environment variable
 const ROOT_ID =
@@ -28,7 +27,6 @@ export type ViewMode =
 
 export default function ViewToggle() {
   const { view: currentView, setView, setRootId } = useDashboard();
-  const router = useRouter();
 
   const tabs = [
     {
@@ -65,13 +63,15 @@ export default function ViewToggle() {
           <button
             key={tab.id}
             onClick={() => {
-              // When switching to tree or mindmap, navigate to URL with specific rootId
+              // When switching to tree or mindmap, set view and rootId directly for faster response
               if (tab.id === "tree") {
-                router.push(`/dashboard?view=tree&rootId=${ROOT_ID}`);
+                setView("tree");
+                setRootId(ROOT_ID);
                 return;
               }
               if (tab.id === "mindmap") {
-                router.push(`/dashboard?view=mindmap&rootId=${ROOT_ID}`);
+                setView("mindmap");
+                setRootId(ROOT_ID);
                 return;
               }
               // For other views, use normal setView
