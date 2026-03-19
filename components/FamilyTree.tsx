@@ -48,10 +48,12 @@ export default function FamilyTree({
   const [hideFemales, setHideFemales] = useState(false);
   const [maxDepth, setMaxDepth] = useState<number>(0);
 
-  const { showAvatar, setShowAvatar } = useDashboard();
+  const { showAvatar, setShowAvatar, setRootId } = useDashboard();
   const filtersRef = useRef<HTMLDivElement>(null);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
-  const [depthPortalNode, setDepthPortalNode] = useState<HTMLElement | null>(null);
+  const [depthPortalNode, setDepthPortalNode] = useState<HTMLElement | null>(
+    null,
+  );
   const [isExportingHTML, setIsExportingHTML] = useState(false);
 
   useEffect(() => {
@@ -91,7 +93,8 @@ export default function FamilyTree({
             const data = getTreeData(personId);
             if (!data.person) return null;
 
-            const shouldIncludeChildren = maxDepth === 0 || level < maxDepth - 1;
+            const shouldIncludeChildren =
+              maxDepth === 0 || level < maxDepth - 1;
             const children = shouldIncludeChildren
               ? data.children
                   .map((child: Person) =>
@@ -258,14 +261,18 @@ export default function FamilyTree({
     const data = getTreeData(personId);
     if (!data.person) return null;
 
-    const hasChildren = (maxDepth > 0 && level >= maxDepth - 1) ? false : data.children.length > 0;
+    const hasChildren =
+      maxDepth > 0 && level >= maxDepth - 1 ? false : data.children.length > 0;
 
     return (
       <li>
         <div className="node-container inline-flex flex-col items-center">
           {/* Main Person & Spouses Row */}
           <div className="flex relative z-10 bg-white rounded-2xl shadow-md border border-stone-200/80 transition-opacity">
-            <FamilyNodeCard person={data.person} />
+            <FamilyNodeCard
+              person={data.person}
+              onClickSetRoot={() => setRootId(data.person.id)}
+            />
 
             {data.spouses.length > 0 && (
               <>
@@ -282,6 +289,7 @@ export default function FamilyTree({
                         spouseData.person.gender === "male" ? "Chồng" : "Vợ"
                       }
                       note={spouseData.note}
+                      onClickSetRoot={() => setRootId(spouseData.person.id)}
                     />
                   </div>
                 ))}
@@ -317,19 +325,23 @@ export default function FamilyTree({
       {depthPortalNode &&
         createPortal(
           <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full px-3 h-10 transition-opacity">
-            <span className="text-sm font-semibold text-stone-600 hidden sm:inline">Độ sâu:</span>
+            <span className="text-sm font-semibold text-stone-600 hidden sm:inline">
+              Độ sâu:
+            </span>
             <input
               type="number"
               min="0"
               max="20"
               value={maxDepth === 0 ? "" : maxDepth}
-              onChange={(e) => setMaxDepth(e.target.value ? parseInt(e.target.value) : 0)}
+              onChange={(e) =>
+                setMaxDepth(e.target.value ? parseInt(e.target.value) : 0)
+              }
               className="w-10 bg-transparent text-sm font-medium text-amber-700 focus:outline-none text-center"
               placeholder="∞"
               title="Giới hạn đời (để trống = Không giới hạn)"
             />
           </div>,
-          depthPortalNode
+          depthPortalNode,
         )}
 
       {/* Grouped Toolbar (Zoom, Filters, Export) Portaled to Header */}
@@ -454,7 +466,8 @@ export default function FamilyTree({
                     const data = getTreeData(personId);
                     if (!data.person) return null;
 
-                    const shouldIncludeChildren = maxDepth === 0 || level < maxDepth - 1;
+                    const shouldIncludeChildren =
+                      maxDepth === 0 || level < maxDepth - 1;
                     const children = shouldIncludeChildren
                       ? data.children
                           .map((child: Person) =>

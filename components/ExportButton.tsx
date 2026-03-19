@@ -41,6 +41,15 @@ export default function ExportButton({
   }, []);
 
   const handleExport = async (format: "png" | "pdf" | "html") => {
+    console.log(
+      "Export clicked:",
+      format,
+      "treeData length:",
+      treeData?.length,
+      "branches length:",
+      branches?.length,
+    );
+
     try {
       setIsExporting(true);
       setShowMenu(false);
@@ -53,16 +62,10 @@ export default function ExportButton({
       if (!element) throw new Error("Không tìm thấy vùng dữ liệu để xuất.");
 
       if (format === "html") {
-        // Use treeData if provided, otherwise fallback to element clone
-        let htmlContent: string;
-
-        if (treeData && treeData.length > 0) {
-          // Use shared utility with tree data and branches
-          htmlContent = generateSimpleFamilyTreeHTML(treeData, branches || []);
-        } else {
-          // Fallback: clone current element
-          const clone = element.cloneNode(true) as HTMLElement;
-          htmlContent = `<!DOCTYPE html>
+        // Always use current tree state from DOM, not cached treeData
+        // This ensures we export the tree with the current root selection
+        const clone = element.cloneNode(true) as HTMLElement;
+        const htmlContent = `<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -77,28 +80,76 @@ export default function ExportButton({
             line-height: 1.6;
         }
         
-        .export-container {
-            max-width: 100%;
-            margin: 0 auto;
+        .person {
+            margin: 10px 0;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .person:hover {
+            border-color: #d97706;
+            box-shadow: 0 4px 6px rgba(217, 119, 6, 0.1);
+        }
+        
+        .person.male {
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .person.female {
+            border-left: 4px solid #ec4899;
+        }
+        
+        .generation {
+            font-size: 12px;
+            font-weight: bold;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+        
+        .person-info h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .person-info p {
+            margin: 2px 0;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .children {
+            margin-left: 40px;
+            border-left: 2px solid #e5e7eb;
+            padding-left: 10px;
+        }
+        
+        .toggle {
+            cursor: pointer;
+            user-select: none;
+            margin-right: 8px;
+            font-size: 12px;
+            color: #6b7280;
         }
         
         @media print {
             body { padding: 0; }
-            .export-container { box-shadow: none; }
+            .person { 
+                page-break-inside: avoid;
+                border: 1px solid #000;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="export-container">
-        ${clone.innerHTML}
-    </div>
+    ${clone.innerHTML}
 </body>
 </html>`;
-        }
 
         // Create and download HTML file (only if htmlContent exists)
         if (htmlContent) {

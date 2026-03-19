@@ -4,6 +4,7 @@ import { Person } from "@/types";
 import { Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { useDashboard } from "./DashboardContext";
+import { usePrefixes } from "./PrefixContext";
 import DefaultAvatar from "./DefaultAvatar";
 
 interface FamilyNodeCardProps {
@@ -12,6 +13,7 @@ interface FamilyNodeCardProps {
   note?: string | null;
   onClickCard?: () => void;
   onClickName?: (e: React.MouseEvent) => void;
+  onClickSetRoot?: () => void; // New prop for setting as root
   isExpandable?: boolean;
   isExpanded?: boolean;
   isRingVisible?: boolean;
@@ -22,21 +24,41 @@ export default function FamilyNodeCard({
   person,
   onClickCard,
   onClickName,
+  onClickSetRoot,
   isExpandable = false,
   isExpanded = false,
   isRingVisible = false,
   isPlusVisible = false,
 }: FamilyNodeCardProps) {
   const { showAvatar, setMemberModalId } = useDashboard();
+  const { getPrefixName } = usePrefixes();
 
   const isDeceased = person.is_deceased;
+
+  // Get prefix name
+  const name = getPrefixName(person.prefix_id);
+  console.log(
+    "FamilyNodeCard Debug - Person:",
+    person.full_name,
+    "prefixId:",
+    person.prefix_id,
+    "name:",
+    name,
+  );
 
   // Calculate generation offset for visual positioning
   const generationOffset = person.generation ? (person.generation - 1) * 15 : 0; // 15px per generation
 
   const content = (
     <div
-      onClick={onClickCard}
+      onClick={() => {
+        if (onClickSetRoot) {
+          onClickSetRoot();
+        } else if (onClickCard) {
+          onClickCard();
+        }
+      }}
+      title={onClickSetRoot ? "Click để đặt làm gốc" : undefined}
       className={`group py-2 px-1 w-20 sm:w-24 md:w-28 flex flex-col items-center justify-start transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative bg-white/70 rounded-2xl
         ${isDeceased ? "grayscale-[0.4] opacity-80" : ""}
       `}
@@ -116,7 +138,7 @@ export default function FamilyNodeCard({
             }
           }}
         >
-          {person.full_name}
+          {name ? `${name} ${person.full_name}` : person.full_name}
         </span>
         {/* {person.birth_order != null && (
           <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 border border-amber-200/60 leading-none">
@@ -144,7 +166,7 @@ export default function FamilyNodeCard({
     </div>
   );
 
-  if (onClickCard || onClickName) {
+  if (onClickCard || onClickName || onClickSetRoot) {
     return content;
   }
 

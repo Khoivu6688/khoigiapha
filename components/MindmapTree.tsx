@@ -17,6 +17,7 @@ import Image from "next/image";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useDashboard } from "./DashboardContext";
+import { usePrefixes } from "./PrefixContext";
 import DefaultAvatar from "./DefaultAvatar";
 import ExportButton from "./ExportButton";
 import { generateSimpleFamilyTreeHTML } from "@/utils/familyTreeUtils";
@@ -39,6 +40,8 @@ interface MindmapContextData {
   showAvatar: boolean;
   expandSignal: { type: "expand" | "collapse"; ts: number } | null;
   setMemberModalId: (id: string | null) => void;
+  setRootId: (id: string | null) => void;
+  getPrefixName: (prefixId: number | null | undefined) => string | null;
 }
 
 // Helper function to resolve tree connections for a person
@@ -110,7 +113,10 @@ const MindmapNode = memo(
 
     if (!data.person) return null;
 
-    const hasChildren = (ctx.maxDepth > 0 && level >= ctx.maxDepth - 1) ? false : data.children.length > 0;
+    const hasChildren =
+      ctx.maxDepth > 0 && level >= ctx.maxDepth - 1
+        ? false
+        : data.children.length > 0;
 
     return (
       <div className={`relative py-1.5 ${level > 0 ? "pl-6" : "pl-0"}`}>
@@ -166,7 +172,15 @@ const MindmapNode = memo(
                 transition={{ duration: 0.3 }}
                 className={`group/card relative flex flex-wrap items-center gap-2 bg-white/60 rounded-2xl border border-stone-200/60 p-2 sm:p-2.5 shadow-sm hover:border-amber-300 hover:shadow-md hover:bg-white/90 transition-all duration-300 overflow-hidden cursor-pointer
                 ${data.person.is_deceased ? "opacity-80 grayscale-[0.3]" : ""}`}
-                onClick={() => ctx.setMemberModalId(data.person.id)}
+                onClick={() => {
+                  // If context has setRootId, use it, otherwise open modal
+                  if (ctx.setRootId) {
+                    ctx.setRootId(data.person.id);
+                  } else {
+                    ctx.setMemberModalId(data.person.id);
+                  }
+                }}
+                title="Click để đặt làm gốc"
               >
                 <div className="flex items-center gap-2.5 relative z-10 w-full">
                   <div className="flex flex-1 items-center gap-2.5 min-w-0">
@@ -199,7 +213,12 @@ const MindmapNode = memo(
                     )}
                     <div className="flex flex-col min-w-0 flex-1">
                       <span className="font-bold text-[14px] text-stone-900 group-hover/card:text-amber-700 transition-colors leading-tight truncate mb-0.5">
-                        {data.person.full_name}
+                        {(() => {
+                          const name = ctx.getPrefixName(data.person.prefix_id);
+                          return name
+                            ? `${name} ${data.person.full_name}`
+                            : data.person.full_name;
+                        })()}
                       </span>
                       <span className="text-[11px] text-stone-500 font-medium truncate flex items-center gap-1">
                         <svg
@@ -297,7 +316,9 @@ const MindmapNode = memo(
                               </div>
                             )}
                             <span className="text-[10px] font-bold text-stone-600 truncate max-w-[50px] text-center">
-                              {spouseData.person.full_name.split(" ").pop()}
+                              {ctx.getPrefixName(spouseData.person.prefix_id)
+                                ? `${ctx.getPrefixName(spouseData.person.prefix_id)} ${spouseData.person.full_name.split(" ").pop()}`
+                                : spouseData.person.full_name.split(" ").pop()}
                             </span>
                           </button>
                         );
@@ -347,9 +368,13 @@ export default function MindmapTree({
   branches,
   canEdit,
 }: MindmapTreeProps) {
-  const { showAvatar, setShowAvatar, setMemberModalId } = useDashboard();
+  const { showAvatar, setShowAvatar, setMemberModalId, setRootId } =
+    useDashboard();
+  const { getPrefixName } = usePrefixes();
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
-  const [depthPortalNode, setDepthPortalNode] = useState<HTMLElement | null>(null);
+  const [depthPortalNode, setDepthPortalNode] = useState<HTMLElement | null>(
+    null,
+  );
   const [showFilters, setShowFilters] = useState(false);
   const [hideSpouses, setHideSpouses] = useState(false);
   const [hideMales, setHideMales] = useState(false);
@@ -400,6 +425,8 @@ export default function MindmapTree({
       showAvatar,
       expandSignal,
       setMemberModalId,
+      setRootId,
+      getPrefixName,
     }),
     [
       personsMap,
@@ -411,6 +438,8 @@ export default function MindmapTree({
       showAvatar,
       expandSignal,
       setMemberModalId,
+      setRootId,
+      getPrefixName,
     ],
   );
 
@@ -432,7 +461,8 @@ export default function MindmapTree({
             const data = getTreeData(personId, ctx);
             if (!data.person) return null;
 
-            const shouldIncludeChildren = ctx.maxDepth === 0 || level < ctx.maxDepth - 1;
+            const shouldIncludeChildren =
+              ctx.maxDepth === 0 || level < ctx.maxDepth - 1;
             const children = shouldIncludeChildren
               ? data.children
                   .map((child: Person) =>
@@ -492,19 +522,23 @@ export default function MindmapTree({
       {depthPortalNode &&
         createPortal(
           <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full px-3 h-10 transition-opacity">
-            <span className="text-sm font-semibold text-stone-600 hidden sm:inline">Độ sâu:</span>
+            <span className="text-sm font-semibold text-stone-600 hidden sm:inline">
+              Độ sâu:
+            </span>
             <input
               type="number"
               min="0"
               max="20"
               value={maxDepth === 0 ? "" : maxDepth}
-              onChange={(e) => setMaxDepth(e.target.value ? parseInt(e.target.value) : 0)}
+              onChange={(e) =>
+                setMaxDepth(e.target.value ? parseInt(e.target.value) : 0)
+              }
               className="w-10 bg-transparent text-sm font-medium text-amber-700 focus:outline-none text-center"
               placeholder="∞"
               title="Giới hạn đời (để trống = Không giới hạn)"
             />
           </div>,
-          depthPortalNode
+          depthPortalNode,
         )}
 
       {/* Grouped Toolbar (Expand/Collapse, Filters, Export) Portaled to Header */}
@@ -629,7 +663,8 @@ export default function MindmapTree({
                     const data = getTreeData(personId, ctx);
                     if (!data.person) return null;
 
-                    const shouldIncludeChildren = ctx.maxDepth === 0 || level < ctx.maxDepth - 1;
+                    const shouldIncludeChildren =
+                      ctx.maxDepth === 0 || level < ctx.maxDepth - 1;
                     const children = shouldIncludeChildren
                       ? data.children
                           .map((child: Person) =>

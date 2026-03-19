@@ -1,5 +1,6 @@
 import { DashboardProvider } from "@/components/DashboardContext";
 import { BranchProvider } from "@/components/BranchContext";
+import { PrefixProvider } from "@/components/PrefixContext";
 import DashboardViews from "@/components/DashboardViews";
 import MemberDetailModal from "@/components/MemberDetailModal";
 import ViewToggle from "@/components/ViewToggle";
@@ -86,15 +87,17 @@ export default async function FamilyTreePage({ searchParams }: PageProps) {
   return (
     <DashboardProvider>
       <BranchProvider>
-        <ViewToggle />
-        <DashboardViews
-          persons={persons}
-          relationships={relationships}
-          branches={branches}
-          canEdit={canEdit}
-        />
+        <PrefixProvider>
+          <ViewToggle />
+          <DashboardViews
+            persons={persons}
+            relationships={relationships}
+            branches={branches}
+            canEdit={canEdit}
+          />
 
-        <MemberDetailModal />
+          <MemberDetailModal />
+        </PrefixProvider>
       </BranchProvider>
     </DashboardProvider>
   );
