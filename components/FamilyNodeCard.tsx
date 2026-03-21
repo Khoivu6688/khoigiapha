@@ -1,7 +1,7 @@
 "use client";
 
 import { Person } from "@/types";
-import { Minus, Plus } from "lucide-react";
+import { ExternalLink, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { useDashboard } from "./DashboardContext";
 import { usePrefixes } from "./PrefixContext";
@@ -157,12 +157,18 @@ export default function FamilyNodeCard({
         )} */}
       </div>
 
-      {/* 3. Role */}
-      {/* {role && (
-        <span className="mt-1 px-2.5 py-0.5 bg-stone-100/80 border border-stone-200 text-stone-500 font-medium tracking-wide w-auto text-center leading-tight rounded-full text-[10px] shadow-sm">
-          {role} {note && `(${note})`}
-        </span>
-      )} */}
+      {/* 4. Details Link */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setMemberModalId(person.id);
+        }}
+        className="mt-2 flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors border border-amber-200/50 group/link"
+        title="Xem chi tiết thành viên"
+      >
+        <ExternalLink className="size-2.5 group-hover/link:scale-110 transition-transform" />
+        <span className="text-[9px] font-bold uppercase tracking-tight">Chi tiết</span>
+      </button>
     </div>
   );
 

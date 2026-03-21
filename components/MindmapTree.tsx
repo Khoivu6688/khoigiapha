@@ -9,6 +9,7 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   Code,
+  ExternalLink,
   Filter,
   Image as ImageIcon,
   Share2,
@@ -265,6 +266,18 @@ const MindmapNode = memo(
                           )}
                         </div>
                       )}
+                      {/* 4. Details Link */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          ctx.setMemberModalId(data.person.id);
+                        }}
+                        className="mt-2.5 flex items-center gap-1.5 w-max px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors border border-amber-200/50 group/link"
+                        title="Xem chi tiết thành viên"
+                      >
+                        <ExternalLink className="size-3 group-hover/link:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">Chi tiết</span>
+                      </button>
                     </div>
                   </div>
 
