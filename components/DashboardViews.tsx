@@ -68,7 +68,7 @@ export default function DashboardViews({
 
   return (
     <>
-      <main className="flex-1 overflow-auto bg-stone-50/50 flex flex-col">
+      <main className="flex-1 bg-stone-50/50 flex flex-col">
         {(currentView === "tree" || currentView === "mindmap") &&
           persons.length > 0 &&
           activeRootId && (

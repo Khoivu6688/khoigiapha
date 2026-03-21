@@ -167,7 +167,9 @@ export default function FamilyNodeCard({
         title="Xem chi tiết thành viên"
       >
         <ExternalLink className="size-2.5 group-hover/link:scale-110 transition-transform" />
-        <span className="text-[9px] font-bold uppercase tracking-tight">Chi tiết</span>
+        <span className="text-[9px] font-bold uppercase tracking-tight">
+          Chi tiết
+        </span>
       </button>
     </div>
   );
