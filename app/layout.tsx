@@ -17,8 +17,9 @@ export const metadata: Metadata = {
     template: "%s | Gia phả họ Vũ Bá - Thái Bình",
   },
   description:
-    "Gia phả họ Vũ Bá - Thái Bình - "Cây có gốc mới nở nhành xanh lá, nước có nguồn mới bể rộng sông sâu.
-Trang gia phả điện tử này được lập nên với tấm lòng thành kính, nhằm lưu giữ anh linh của tổ tiên và ghi dấu công đức của các bậc tiền hiền họ [Vũ Bá]. Đây không chỉ là cuốn sử liệu của dòng họ mà còn là nhịp cầu kết nối muôn phương, để con cháu đời đời soi rọi, biết ơn nguồn cội và cùng nhau gìn giữ nếp nhà",
+    "Gia phả họ Vũ Bá - Thái Bình - 
+    Cây có gốc mới nở nhành xanh lá, nước có nguồn mới bể rộng sông sâu,
+    Trang gia phả điện tử này được lập nên với tấm lòng thành kính, nhằm lưu giữ anh linh của tổ tiên và ghi dấu công đức của các bậc tiền hiền họ Vũ Bá. Đây không chỉ là cuốn sử liệu của dòng họ mà còn là nhịp cầu kết nối muôn phương, để con cháu đời đời soi rọi, biết ơn nguồn cội và cùng nhau gìn giữ nếp nhà",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
