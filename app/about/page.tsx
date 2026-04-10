@@ -35,14 +35,15 @@ export default function AboutPage() {
 
             <div className="max-w-none">
               <p className="text-stone-600 leading-relaxed text-[15px] mb-8">
-                <strong className="text-stone-800">Gia Phả OS</strong> Trang gia phả điện tử này được lập nên với tấm lòng thành kính
-                nhằm lưu giữ anh linh của tổ tiên và ghi dấu công đức của các bậc tiền hiền họ Vũ Bá - 
-                nghành II Xã Vũ Hội, Vũ Thư, Thái Bình . Đây không chỉ là cuốn sử liệu của dòng họ mà 
-                còn là nhịp cầu kết nối muôn phương, để con cháu đời đời soi rọi, biết ơn nguồn cội 
-                và cùng nhau gìn giữ nếp nhà.
+                <strong className="text-stone-800">Gia Phả OS</strong> 
+                Trang gia phả điện tử này được lập nên với tấm lòng thành kính nhằm lưu giữ anh linh
+                của tổ tiên và ghi dấu công đức của các bậc tiền hiền họ Vũ Bá - nghành II Xã Vũ Hội,
+                Vũ Thư, Thái Bình . Đây không chỉ là cuốn sử liệu của dòng họ mà còn là nhịp cầu kết 
+                nối muôn phương, để con cháu đời đời soi rọi, biết ơn nguồn cội và cùng nhau gìn giữ
+                nếp nhà.
   
          
-            Vũ Văn Khởi, phụng lập năm Bính ngọ, 2026.
+                                 Vũ Văn Khởi, phụng lập năm Bính ngọ, 2026.
               </p>
 
               <div className="mt-8 mb-4 border-t border-stone-100 pt-8 flex items-center gap-3">
