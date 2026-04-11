@@ -24,6 +24,12 @@ interface SpouseData {
   note?: string | null;
 }
 
+// ─── Hằng số đường nối — chỉnh 1 chỗ là thay đổi toàn bộ ────────────────────
+const LINE_W = 2;             // độ dày đường (px)
+const LINE_COLOR = "#a8a29e"; // stone-400 — đậm hơn bản gốc
+const V_GAP = 32;             // khoảng dọc giữa card cha và hàng con (px)
+const H_GAP = 12;             // khoảng ngang giữa các con (px)
+
 export default function FamilyTree({
   personsMap,
   relationships,
@@ -73,7 +79,6 @@ export default function FamilyTree({
   const handleZoomOut = () => setScale((s) => Math.max(s - 0.1, 0.3));
   const handleResetZoom = () => setScale(1);
 
-  // ─── Center on mount ────────────────────────────────────────────────────────
   useEffect(() => {
     if (containerRef.current) {
       const el = containerRef.current;
@@ -81,7 +86,7 @@ export default function FamilyTree({
     }
   }, [roots]);
 
-  // ─── Drag handlers ──────────────────────────────────────────────────────────
+  // ─── Drag ─────────────────────────────────────────────────────────────────
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsPressed(true);
     hasDraggedRef.current = false;
@@ -122,7 +127,7 @@ export default function FamilyTree({
     }
   };
 
-  // ─── Tree data helpers ───────────────────────────────────────────────────────
+  // ─── Data helpers ─────────────────────────────────────────────────────────
   const getTreeData = (personId: string) => {
     const spousesList: SpouseData[] = relationships
       .filter(
@@ -171,7 +176,7 @@ export default function FamilyTree({
     };
   };
 
-  // ─── Export ─────────────────────────────────────────────────────────────────
+  // ─── Export ───────────────────────────────────────────────────────────────
   const exportSimpleHTML = async () => {
     try {
       setIsExportingHTML(true);
@@ -203,7 +208,6 @@ export default function FamilyTree({
           return buildNode(root.id);
         })
         .filter(Boolean);
-
       const htmlContent = generateSimpleFamilyTreeHTML(treeData, branches);
       const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
       const url = URL.createObjectURL(blob);
@@ -221,22 +225,27 @@ export default function FamilyTree({
     }
   };
 
-  // ─── Render tree node ────────────────────────────────────────────────────────
+  // ─── Render tree node ─────────────────────────────────────────────────────
   //
-  // THAY ĐỔI CHÍNH: Thay vì dùng CSS tree float-based (dàn ngang),
-  // dùng flex-col layout. Mỗi node là một cột dọc:
-  //   [Card row]
-  //      |  (đường kẻ dọc)
-  //   [children row — flex-row, căn giữa]
+  // Sơ đồ đường nối (nhìn từ trên xuống):
   //
-  // Điều này giúp cây gọn hơn: mỗi nhánh chỉ chiếm đúng độ rộng node của nó,
-  // không bị ép ra ngoài bởi anh/chị/em.
+  //         ┌──────────────┐
+  //         │  Card cha    │   ← z-index: 10
+  //         └──────┬───────┘
+  //                │  ← đường dọc cao V_GAP/2 (nửa trên)
+  //         ───────┼───────    ← đường ngang SVG, y = V_GAP/2
+  //         │      │      │   ← đường dọc cao V_GAP/2 (nửa dưới) cho mỗi con
+  //       [con1] [con2] [con3]
+  //
+  // Kỹ thuật SVG:
+  //   - SVG absolute, width=100%, height=V_GAP, overflow=visible
+  //   - vectorEffect="non-scaling-stroke" để lineW luôn = px thật dù SVG scale
+  //   - Tọa độ X dùng % để tự động căn giữa mỗi con bất kể width khác nhau
   //
   const renderTreeNode = (
     personId: string,
     visited: Set<string> = new Set(),
     level = 0,
-    isLastSibling = true,
   ): React.ReactNode => {
     if (visited.has(personId)) return null;
     visited.add(personId);
@@ -247,6 +256,8 @@ export default function FamilyTree({
     const hasChildren =
       (maxDepth === 0 || level < maxDepth - 1) && data.children.length > 0;
     const isCollapsed = collapsedNodeIds.has(personId);
+    const showChildren = hasChildren && !isCollapsed;
+    const childCount = data.children.length;
 
     const handleToggle = (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -258,10 +269,13 @@ export default function FamilyTree({
     };
 
     return (
-      // Mỗi node là một cột flex dọc, căn giữa theo trục ngang
       <div key={personId} className="flex flex-col items-center">
-        {/* Card row: người chính + vợ/chồng */}
-        <div className="relative flex items-center bg-white rounded-2xl shadow-md border border-stone-200/80 gap-0.5 p-0.5 z-10">
+
+        {/* Card row */}
+        <div
+          className="relative flex items-center bg-white rounded-2xl shadow-md border border-stone-200/80 gap-0.5 p-0.5"
+          style={{ zIndex: 10 }}
+        >
           <FamilyNodeCard
             person={data.person}
             onClickSetRoot={() => setRootId(data.person.id)}
@@ -278,55 +292,108 @@ export default function FamilyTree({
             />
           ))}
 
-          {/* Nút collapse/expand */}
           {hasChildren && (
             <div
               onClick={handleToggle}
-              className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white border border-stone-200/80 rounded-full size-6 flex items-center justify-center shadow-md z-20 text-stone-400 hover:text-amber-600 transition-colors cursor-pointer"
+              className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white rounded-full size-6 flex items-center justify-center shadow-md cursor-pointer text-stone-400 hover:text-amber-600 transition-colors"
+              style={{ zIndex: 20, border: `${LINE_W}px solid ${LINE_COLOR}` }}
             >
-              {isCollapsed ? (
-                <Plus className="w-3.5 h-3.5" />
-              ) : (
-                <Minus className="w-3.5 h-3.5" />
-              )}
+              {isCollapsed ? <Plus className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
             </div>
           )}
         </div>
 
-        {/* Đường kẻ dọc từ card xuống children */}
-        {hasChildren && !isCollapsed && (
+        {/* Đường dọc từ card xuống + hàng con */}
+        {showChildren && (
           <>
-            <div className="w-px bg-stone-300 h-7 flex-shrink-0" />
+            {/* Đoạn dọc từ card xuống gặp đường ngang (nửa trên V_GAP) */}
+            <div
+              style={{
+                width: LINE_W,
+                height: V_GAP / 2,
+                background: LINE_COLOR,
+                flexShrink: 0,
+              }}
+            />
 
-            {/* Hàng các con — flex-row, căn giữa */}
-            <div className="flex flex-row items-start gap-3 relative">
-              {data.children.map((child, idx) => {
-                const isFirst = idx === 0;
-                const isLast = idx === data.children.length - 1;
-                const isOnly = data.children.length === 1;
+            {/* Wrapper chứa SVG đường nối + hàng con */}
+            <div
+              className="relative flex flex-row items-start"
+              style={{ gap: H_GAP }}
+            >
+              {/*
+                SVG vẽ:
+                - Đường ngang (y = V_GAP/2) từ center con đầu → center con cuối
+                - Đường dọc (nửa dưới) xuống mỗi con
 
-                return (
-                  <div key={child.id} className="flex flex-col items-center relative">
-                    {/* Đường kẻ ngang nối anh/chị/em */}
-                    <div
-                      className={[
-                        "absolute top-0 h-px bg-stone-300",
-                        isOnly
-                          ? "hidden"
-                          : isFirst
-                          ? "left-1/2 right-0"
-                          : isLast
-                          ? "left-0 right-1/2"
-                          : "left-0 right-0",
-                      ].join(" ")}
+                Dùng SVG thay CSS để:
+                1. Đường KHÔNG đứt — liên tục pixel-perfect
+                2. vectorEffect="non-scaling-stroke" giữ độ dày đúng khi zoom
+                3. Tọa độ % tự động căn giữa bất kể width node khác nhau
+              */}
+              <svg
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: V_GAP / 2,
+                  overflow: "visible",
+                  pointerEvents: "none",
+                  zIndex: 0,
+                }}
+              >
+                {childCount === 1 ? (
+                  // 1 con: chỉ đường dọc thẳng
+                  <line
+                    x1="50%"
+                    y1="0"
+                    x2="50%"
+                    y2={`${V_GAP / 2}`}
+                    stroke={LINE_COLOR}
+                    strokeWidth={LINE_W}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ) : (
+                  <>
+                    {/* Đường ngang nối trung tâm con đầu → con cuối */}
+                    <line
+                      x1={`${(0.5 / childCount) * 100}%`}
+                      y1="0"
+                      x2={`${((childCount - 0.5) / childCount) * 100}%`}
+                      y2="0"
+                      stroke={LINE_COLOR}
+                      strokeWidth={LINE_W}
+                      vectorEffect="non-scaling-stroke"
                     />
-                    {/* Đường kẻ dọc từ đường ngang xuống card con */}
-                    <div className="w-px bg-stone-300 h-7 flex-shrink-0" />
+                    {/* Đường dọc xuống từng con */}
+                    {Array.from({ length: childCount }).map((_, i) => (
+                      <line
+                        key={i}
+                        x1={`${((i + 0.5) / childCount) * 100}%`}
+                        y1="0"
+                        x2={`${((i + 0.5) / childCount) * 100}%`}
+                        y2={`${V_GAP / 2}`}
+                        stroke={LINE_COLOR}
+                        strokeWidth={LINE_W}
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    ))}
+                  </>
+                )}
+              </svg>
 
-                    {renderTreeNode(child.id, new Set(visited), level + 1, isLast)}
-                  </div>
-                );
-              })}
+              {/* Hàng con — mỗi con thêm paddingTop để tránh overlap SVG */}
+              {data.children.map((child) => (
+                <div
+                  key={child.id}
+                  className="flex flex-col items-center"
+                  style={{ paddingTop: V_GAP / 2 }}
+                >
+                  {renderTreeNode(child.id, new Set(visited), level + 1)}
+                </div>
+              ))}
             </div>
           </>
         )}
@@ -343,17 +410,21 @@ export default function FamilyTree({
 
   return (
     <div className="w-full h-full relative">
-      {/* Depth Control Portal */}
+      {/* Depth portal */}
       {depthPortalNode &&
         createPortal(
           <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full px-3 h-10">
-            <span className="text-sm font-semibold text-stone-600 hidden sm:inline">Độ sâu:</span>
+            <span className="text-sm font-semibold text-stone-600 hidden sm:inline">
+              Độ sâu:
+            </span>
             <input
               type="number"
               min="0"
               max="20"
               value={maxDepth === 0 ? "" : maxDepth}
-              onChange={(e) => setMaxDepth(e.target.value ? parseInt(e.target.value) : 0)}
+              onChange={(e) =>
+                setMaxDepth(e.target.value ? parseInt(e.target.value) : 0)
+              }
               className="w-10 bg-transparent text-sm font-medium text-amber-700 focus:outline-none text-center"
               placeholder="∞"
               title="Giới hạn đời (để trống = Không giới hạn)"
@@ -362,10 +433,13 @@ export default function FamilyTree({
           depthPortalNode,
         )}
 
-      {/* Toolbar Portal */}
+      {/* Toolbar portal */}
       {portalNode &&
         createPortal(
-          <div className="flex flex-wrap justify-center items-center gap-2 w-max" ref={filtersRef}>
+          <div
+            className="flex flex-wrap justify-center items-center gap-2 w-max"
+            ref={filtersRef}
+          >
             {/* Zoom */}
             <div className="flex items-center bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full overflow-hidden h-10">
               <button
@@ -406,7 +480,6 @@ export default function FamilyTree({
                 <Filter className="size-4" />
                 <span className="hidden sm:inline">Lọc hiển thị</span>
               </button>
-
               <AnimatePresence>
                 {showFilters && (
                   <motion.div
@@ -416,23 +489,47 @@ export default function FamilyTree({
                     transition={{ duration: 0.15, ease: "easeOut" }}
                     className="absolute top-full right-0 mt-2 w-48 bg-white/95 backdrop-blur-xl shadow-xl border border-stone-200/60 rounded-2xl p-4 flex flex-col gap-3 z-50"
                   >
-                    <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">HIỂN THỊ</div>
+                    <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">
+                      HIỂN THỊ
+                    </div>
                     <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer hover:text-stone-900 transition-colors select-none">
-                      <input type="checkbox" checked={!showAvatar} onChange={(e) => setShowAvatar(!e.target.checked)} className="rounded text-amber-600 focus:ring-amber-500 cursor-pointer size-4" />
+                      <input
+                        type="checkbox"
+                        checked={!showAvatar}
+                        onChange={(e) => setShowAvatar(!e.target.checked)}
+                        className="rounded text-amber-600 focus:ring-amber-500 cursor-pointer size-4"
+                      />
                       <ImageIcon className="size-4 text-stone-400" /> Ẩn ảnh đại diện
                     </label>
                     <div className="h-px w-full bg-stone-100 my-1" />
-                    <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">LỌC DỮ LIỆU</div>
+                    <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">
+                      LỌC DỮ LIỆU
+                    </div>
                     <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer hover:text-stone-900 select-none">
-                      <input type="checkbox" checked={hideSpouses} onChange={(e) => setHideSpouses(e.target.checked)} className="rounded text-amber-600 focus:ring-amber-500 cursor-pointer size-4" />
+                      <input
+                        type="checkbox"
+                        checked={hideSpouses}
+                        onChange={(e) => setHideSpouses(e.target.checked)}
+                        className="rounded text-amber-600 focus:ring-amber-500 cursor-pointer size-4"
+                      />
                       Ẩn dâu/rể
                     </label>
                     <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer hover:text-stone-900 select-none">
-                      <input type="checkbox" checked={hideMales} onChange={(e) => setHideMales(e.target.checked)} className="rounded text-amber-600 focus:ring-amber-500 cursor-pointer size-4" />
+                      <input
+                        type="checkbox"
+                        checked={hideMales}
+                        onChange={(e) => setHideMales(e.target.checked)}
+                        className="rounded text-amber-600 focus:ring-amber-500 cursor-pointer size-4"
+                      />
                       Ẩn nam
                     </label>
                     <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer hover:text-stone-900 select-none">
-                      <input type="checkbox" checked={hideFemales} onChange={(e) => setHideFemales(e.target.checked)} className="rounded text-amber-600 focus:ring-amber-500 cursor-pointer size-4" />
+                      <input
+                        type="checkbox"
+                        checked={hideFemales}
+                        onChange={(e) => setHideFemales(e.target.checked)}
+                        className="rounded text-amber-600 focus:ring-amber-500 cursor-pointer size-4"
+                      />
                       Ẩn nữ
                     </label>
                   </motion.div>
@@ -447,14 +544,20 @@ export default function FamilyTree({
               className="h-10 px-4 rounded-full bg-white/80 backdrop-blur-md border border-stone-200/60 font-semibold text-sm flex items-center gap-2 text-stone-600 hover:bg-white hover:shadow-md transition-all disabled:opacity-50"
             >
               <Code className="size-4" />
-              <span className="hidden sm:inline">{isExportingHTML ? "Đang xuất..." : "HTML"}</span>
+              <span className="hidden sm:inline">
+                {isExportingHTML ? "Đang xuất..." : "HTML"}
+              </span>
             </button>
 
-            {/* Export Image */}
+            {/* Export image */}
             <ExportButton
               treeData={roots
                 .map((root) => {
-                  const buildNode = (personId: string, visited: Set<string> = new Set(), level = 0): any => {
+                  const buildNode = (
+                    personId: string,
+                    visited: Set<string> = new Set(),
+                    level = 0,
+                  ): any => {
                     if (visited.has(personId)) return null;
                     visited.add(personId);
                     const data = getTreeData(personId);
@@ -466,7 +569,11 @@ export default function FamilyTree({
                       spouses: data.spouses.map((s) => s.person),
                       children:
                         shouldInclude && !isCollapsed
-                          ? data.children.map((c) => buildNode(c.id, new Set(visited), level + 1)).filter(Boolean)
+                          ? data.children
+                              .map((c) =>
+                                buildNode(c.id, new Set(visited), level + 1),
+                              )
+                              .filter(Boolean)
                           : [],
                       level,
                     };
@@ -494,19 +601,8 @@ export default function FamilyTree({
         <div
           id="export-container"
           className={`w-max min-w-full mx-auto p-8 transition-all duration-200 ${isDragging ? "opacity-90" : ""}`}
-          style={{
-            transform: `scale(${scale})`,
-            transformOrigin: "top center",
-          }}
+          style={{ transform: `scale(${scale})`, transformOrigin: "top center" }}
         >
-          {/*
-            THAY ĐỔI: Bỏ hoàn toàn CSS float-based tree (.css-tree ul/li).
-            Thay bằng flex-row của các root nodes, mỗi root là một cột độc lập.
-            Cách này giúp:
-            - Không bị dàn trải ngang bởi số lượng con ở thế hệ dưới
-            - Mỗi nhánh chỉ chiếm đúng độ rộng cần thiết
-            - Dễ đọc hơn với cây nhiều đời
-          */}
           <div className="flex flex-row items-start justify-center gap-8">
             {roots.map((root) => (
               <React.Fragment key={root.id}>
