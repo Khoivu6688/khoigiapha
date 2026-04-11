@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+
 import { Person, Relationship } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -53,14 +54,19 @@ export default function FamilyTree({
   const { showAvatar, setShowAvatar, setRootId } = useDashboard();
   const filtersRef = useRef<HTMLDivElement>(null);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
-  const [depthPortalNode, setDepthPortalNode] = useState<HTMLElement | null>(null);
+  const [depthPortalNode, setDepthPortalNode] = useState<HTMLElement | null>(
+    null,
+  );
   const [isExportingHTML, setIsExportingHTML] = useState(false);
 
   useEffect(() => {
     setPortalNode(document.getElementById("tree-toolbar-portal"));
     setDepthPortalNode(document.getElementById("tree-depth-portal"));
     const handleClickOutside = (event: MouseEvent) => {
-      if (filtersRef.current && !filtersRef.current.contains(event.target as Node)) {
+      if (
+        filtersRef.current &&
+        !filtersRef.current.contains(event.target as Node)
+      ) {
         setShowFilters(false);
       }
     };
@@ -72,22 +78,47 @@ export default function FamilyTree({
   const handleZoomOut = () => setScale((s) => Math.max(s - 0.1, 0.3));
   const handleResetZoom = () => setScale(1);
 
-  // Tối ưu mục 3: Logic sắp xếp thứ tự ưu tiên birth_order
+  // Helper function to resolve tree connections
   const getTreeData = (personId: string) => {
     const spousesList: SpouseData[] = relationships
-      .filter((r) => r.type === "marriage" && (r.person_a === personId || r.person_b === personId))
+      .filter(
+        (r) =>
+          r.type === "marriage" &&
+          (r.person_a === personId || r.person_b === personId),
+      )
       .map((r) => {
         const spouseId = r.person_a === personId ? r.person_b : r.person_a;
-        return { person: personsMap.get(spouseId)!, note: r.note };
+        return {
+          person: personsMap.get(spouseId)!,
+          note: r.note,
+        };
       })
-      .filter((s) => s.person && (!hideSpouses && !(hideMales && s.person.gender === "male") && !(hideFemales && s.person.gender === "female")));
+      .filter((s) => s.person)
+      .filter((s) => {
+        if (hideSpouses) return false;
+        if (hideMales && s.person.gender === "male") return false;
+        if (hideFemales && s.person.gender === "female") return false;
+        return true;
+      });
 
-    const childRels = relationships.filter((r) => (r.type === "biological_child" || r.type === "adopted_child") && r.person_a === personId);
+    const childRels = relationships.filter(
+      (r) =>
+        (r.type === "biological_child" || r.type === "adopted_child") &&
+        r.person_a === personId,
+    );
 
-    const childrenList = (childRels.map((r) => personsMap.get(r.person_b)).filter(Boolean) as Person[])
-      .filter((c) => !(hideMales && c.gender === "male") && !(hideFemales && c.gender === "female"))
+    const childrenList = (
+      childRels
+        .map((r) => personsMap.get(r.person_b))
+        .filter(Boolean) as Person[]
+    )
+      .filter((c) => {
+        if (hideMales && c.gender === "male") return false;
+        if (hideFemales && c.gender === "female") return false;
+        return true;
+      })
       .sort((a, b) => {
-        // Sắp xếp thứ tự sinh từ bảng Person 
+        // MỤC 3: Ưu tiên birth_order để anh đổi vị trí
         const aOrder = a.birth_order ?? Infinity;
         const bOrder = b.birth_order ?? Infinity;
         if (aOrder !== bOrder) return aOrder - bOrder;
@@ -96,30 +127,63 @@ export default function FamilyTree({
         return aYear - bYear;
       });
 
-    return { person: personsMap.get(personId)!, spouses: spousesList, children: childrenList };
+    return {
+      person: personsMap.get(personId)!,
+      spouses: spousesList,
+      children: childrenList,
+    };
   };
 
-  const renderTreeNode = (personId: string, visited: Set<string> = new Set(), level: number = 0): React.ReactNode => {
+  const renderTreeNode = (
+    personId: string,
+    visited: Set<string> = new Set(),
+    level: number = 0,
+  ): React.ReactNode => {
     if (visited.has(personId)) return null;
     visited.add(personId);
+
     const data = getTreeData(personId);
     if (!data.person) return null;
 
-    const hasChildren = maxDepth > 0 && level >= maxDepth - 1 ? false : data.children.length > 0;
+    const hasChildren =
+      maxDepth > 0 && level >= maxDepth - 1 ? false : data.children.length > 0;
     const isCollapsed = collapsedNodeIds.has(personId);
 
     return (
       <li>
         <div className="node-container inline-flex flex-col items-center">
-          <div className="flex relative z-10 bg-white rounded-xl shadow-sm border border-stone-200 transition-all hover:shadow-md">
-            <FamilyNodeCard person={data.person} onClickSetRoot={() => setRootId(data.person.id)} />
+          <div className="flex relative z-10 bg-white rounded-2xl shadow-md border border-stone-200/80 transition-all">
+            <FamilyNodeCard
+              person={data.person}
+              onClickSetRoot={() => setRootId(data.person.id)}
+            />
+
             {data.spouses.map((spouseData, idx) => (
-              <FamilyNodeCard key={spouseData.person.id} isRingVisible={idx === 0} person={spouseData.person} role={spouseData.person.gender === "male" ? "Chồng" : "Vợ"} onClickSetRoot={() => setRootId(spouseData.person.id)} />
+              <div key={spouseData.person.id} className="flex relative">
+                <FamilyNodeCard
+                  isRingVisible={idx === 0}
+                  isPlusVisible={idx > 0}
+                  person={spouseData.person}
+                  role={spouseData.person.gender === "male" ? "Chồng" : "Vợ"}
+                  note={spouseData.note}
+                  onClickSetRoot={() => setRootId(spouseData.person.id)}
+                />
+              </div>
             ))}
+
             {hasChildren && (
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white border border-stone-200 rounded-full size-5 flex items-center justify-center shadow-sm z-20 cursor-pointer text-stone-400 hover:text-amber-600" 
-                   onClick={(e) => { e.stopPropagation(); setCollapsedNodeIds(prev => { const n = new Set(prev); n.has(personId) ? n.delete(personId) : n.add(personId); return n; }); }}>
-                {isCollapsed ? <Plus className="size-3" /> : <Minus className="size-3" />}
+              <div
+                className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white border border-stone-200/80 rounded-full size-6 flex items-center justify-center shadow-md z-10 cursor-pointer text-stone-500 hover:text-amber-600 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCollapsedNodeIds((prev) => {
+                    const next = new Set(prev);
+                    next.has(personId) ? next.delete(personId) : next.add(personId);
+                    return next;
+                  });
+                }}
+              >
+                {!isCollapsed ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
               </div>
             )}
           </div>
@@ -127,7 +191,9 @@ export default function FamilyTree({
         {hasChildren && !isCollapsed && (
           <ul>
             {data.children.map((child) => (
-              <React.Fragment key={child.id}>{renderTreeNode(child.id, new Set(visited), level + 1)}</React.Fragment>
+              <React.Fragment key={child.id}>
+                {renderTreeNode(child.id, new Set(visited), level + 1)}
+              </React.Fragment>
             ))}
           </ul>
         )}
@@ -135,30 +201,66 @@ export default function FamilyTree({
     );
   };
 
-  // Render & Toolbar logic giữ nguyên... (Phần export và handle scroll)
-  
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsPressed(true);
+    hasDraggedRef.current = false;
+    setDragStart({ x: e.pageX, y: e.pageY });
+    if (containerRef.current) {
+      setScrollStart({
+        left: containerRef.current.scrollLeft,
+        top: containerRef.current.scrollTop,
+      });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isPressed || !containerRef.current) return;
+    const dx = e.pageX - dragStart.x;
+    const dy = e.pageY - dragStart.y;
+    if (!hasDraggedRef.current && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+      setIsDragging(true);
+      hasDraggedRef.current = true;
+    }
+    if (hasDraggedRef.current) {
+      e.preventDefault();
+      containerRef.current.scrollLeft = scrollStart.left - dx;
+      containerRef.current.scrollTop = scrollStart.top - dy;
+    }
+  };
+
+  const handleMouseUpOrLeave = () => {
+    setIsPressed(false);
+    setIsDragging(false);
+  };
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (hasDraggedRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
+      hasDraggedRef.current = false;
+    }
+  };
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const el = containerRef.current;
+      el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+    }
+  }, [roots]);
+
+  if (roots.length === 0) return <div className="text-center p-10 text-stone-500">Không tìm thấy dữ liệu.</div>;
+
   return (
     <div className="w-full h-full relative">
+      {/* Portals */}
+      {depthPortalNode && createPortal(<div className="flex items-center gap-2 bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full px-3 h-10 transition-opacity"><span className="text-sm font-semibold text-stone-600 hidden sm:inline">Độ sâu:</span><input type="number" min="0" max="20" value={maxDepth === 0 ? "" : maxDepth} onChange={(e) => setMaxDepth(e.target.value ? parseInt(e.target.value) : 0)} className="w-10 bg-transparent text-sm font-medium text-amber-700 focus:outline-none text-center" placeholder="∞" /></div>, depthPortalNode)}
+      {portalNode && createPortal(<div className="flex flex-wrap justify-center items-center gap-2 w-max" ref={filtersRef}><div className="flex items-center bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full overflow-hidden h-10"><button onClick={handleZoomOut} className="px-3 h-full hover:bg-stone-100/50 text-stone-600 transition-colors disabled:opacity-50"><ZoomOut className="size-4" /></button><button onClick={handleResetZoom} className="px-2 h-full hover:bg-stone-100/50 text-stone-600 transition-colors text-xs font-medium min-w-[50px] text-center border-x border-stone-200/50">{Math.round(scale * 100)}%</button><button onClick={handleZoomIn} className="px-3 h-full hover:bg-stone-100/50 text-stone-600 transition-colors disabled:opacity-50"><ZoomIn className="size-4" /></button></div><div className="relative"><button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-2 px-4 h-10 rounded-full font-semibold text-sm shadow-sm border transition-all ${showFilters ? "bg-amber-100/90 text-amber-800 border-amber-200" : "bg-white/80 text-stone-600 border-stone-200/60 hover:bg-white backdrop-blur-md"}`}><Filter className="size-4" /><span className="hidden sm:inline">Lọc hiển thị</span></button><AnimatePresence>{showFilters && <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} className="absolute top-full right-0 mt-2 w-48 bg-white/95 backdrop-blur-xl shadow-xl border border-stone-200/60 rounded-2xl p-4 flex flex-col gap-3 z-50"><label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={!showAvatar} onChange={(e) => setShowAvatar(!e.target.checked)} className="rounded size-4" /><ImageIcon className="size-4 text-stone-400" /> Ẩn ảnh</label><div className="h-px w-full bg-stone-100"></div><label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={hideSpouses} onChange={(e) => setHideSpouses(e.target.checked)} className="rounded size-4" /> Ẩn dâu/rể</label></motion.div>}</AnimatePresence></div></div>, portalNode)}
+
       <style dangerouslySetInnerHTML={{ __html: `
-        /* Tối ưu mục 1 & 4: Độ cao đồng nhất và thu hẹp khoảng cách ngang */
-        .css-tree ul {
-          padding-top: 20px; 
-          position: relative;
-          display: flex;
-          justify-content: center;
-        }
-        .css-tree li {
-          float: left; text-align: center;
-          list-style-type: none;
-          position: relative;
-          padding: 20px 2px 0 2px; /* Thu hẹp tối đa khoảng cách ngang giữa các anh em */
-        }
-        .css-tree li::before, .css-tree li::after {
-          content: '';
-          position: absolute; top: 0; right: 50%;
-          border-top: 2px solid #d6d3d1;
-          width: 50%; height: 20px;
-        }
+        /* MỤC 1 & 4: Tối ưu khoảng cách và độ cao */
+        .css-tree ul { padding-top: 20px; position: relative; display: flex; justify-content: center; padding-left: 0; user-select: none; }
+        .css-tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 2px 0 2px; }
+        .css-tree li::before, .css-tree li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 2px solid #d6d3d1; width: 50%; height: 20px; }
         .css-tree li::after { right: auto; left: 50%; border-left: 2px solid #d6d3d1; }
         .css-tree li:only-child::after { display: none; }
         .css-tree li:only-child::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #d6d3d1; width: 0; height: 20px; }
@@ -169,14 +271,13 @@ export default function FamilyTree({
         .css-tree li:first-child::after { border-radius: 8px 0 0 0; }
         .css-tree ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #d6d3d1; width: 0; height: 20px; }
         
-        /* Tối ưu mục 5: Khống chế kích thước card để cây gọn hơn */
+        /* MỤC 5: Card gọn hơn */
         .node-container { min-width: 100px; }
-        .css-tree .flex.relative.z-10 { gap: 1px; } /* Vợ chồng đứng sát nhau */
+        .css-tree .flex.relative.z-10 { gap: 2px; }
       `}} />
-      
-      {/* Container hiển thị cây */}
-      <div ref={containerRef} className="w-full h-full overflow-auto bg-stone-50" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUpOrLeave}>
-        <div id="export-container" className="w-max min-w-full mx-auto p-8 css-tree" style={{ transform: `scale(${scale})`, transformOrigin: "top center" }}>
+
+      <div ref={containerRef} className={`w-full h-full overflow-auto bg-stone-50 ${isPressed ? "cursor-grabbing" : "cursor-grab"}`} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUpOrLeave} onMouseLeave={handleMouseUpOrLeave} onClickCapture={handleClickCapture}>
+        <div id="export-container" className="w-max min-w-full mx-auto p-4 css-tree" style={{ transform: `scale(${scale})`, transformOrigin: "top center" }}>
           <ul>{roots.map((root) => <React.Fragment key={root.id}>{renderTreeNode(root.id)}</React.Fragment>)}</ul>
         </div>
       </div>
