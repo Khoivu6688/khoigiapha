@@ -55,7 +55,7 @@ export default function Footer({
             rel="noopener noreferrer"
             className="font-semibold text-blue-600 hover:text-amber-700 transition-colors inline-flex items-center gap-1.5"
           >
-            VŨ VĂN KHỞI phụng lập năm Bính ngọ, 2026
+            Copyright © 2026 VŨ VĂN KHỞI
           </a>
         </p>
       </div>
