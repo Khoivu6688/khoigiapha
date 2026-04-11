@@ -39,16 +39,14 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
   const router = useRouter();
   const supabase = createClient();
 
-  // HÀM ĐĂNG NHẬP GUEST THEO APP GỐC (DÙNG EMAIL/PASS TRONG .ENV)
   const handleGuestLogin = async () => {
     try {
-      // Đọc thông tin từ file .env.local
       const guestEmail = process.env.NEXT_PUBLIC_GUEST_EMAIL;
       const guestPass = process.env.NEXT_PUBLIC_GUEST_PASS;
 
       if (!guestEmail || !guestPass) {
-        console.error("Thiếu thông tin Guest trong file .env.local");
-        alert("Cấu hình hệ thống chưa hoàn tất (Thiếu biến môi trường).");
+        console.error("Thiếu thông tin Guest trong .env.local");
+        alert("Cấu hình hệ thống chưa hoàn tất.");
         return;
       }
 
@@ -58,13 +56,12 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
       });
 
       if (error) {
-        console.error("Lỗi đăng nhập khách:", error.message);
-        alert("Không thể đăng nhập tài khoản khách. Hãy đảm bảo bạn đã tạo user này trên Supabase Authentication.");
+        console.error("Lỗi đăng nhập:", error.message);
+        alert("Không thể đăng nhập tài khoản khách.");
         return;
       }
 
       if (data?.user) {
-        // Đăng nhập thành công, dẫn vào trang công khai
         router.push("/public");
       }
     } catch (err) {
@@ -88,45 +85,23 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
               className="w-full max-w-4xl h-auto rounded-2xl shadow-2xl border-4 border-amber-200"
             />
           </motion.div>
-{/* --- [BƯỚC 1: XÓA TEXT CŨ] ---
-          <p className="text-lg sm:text-xl md:text-2xl text-stone-600 max-w-2xl mx-auto leading-relaxed font-light">
-            Gìn giữ và lưu truyền những giá trị, cội nguồn và truyền thống tốt
-            đẹp của dòng họ cho các thế hệ mai sau. Xem gia phả công khai hoặc
-            đăng nhập để quản lý.
-            <br />
-            <strong>VŨ VĂN KHỞI - phụng lập năm Bính ngọ, 2026</strong>
-          </p>
-                ------------------------------- */}
 
-          {/* --- [BƯỚC 2: THÊM ẢNH MỚI THAY THẾ] --- */}
-          {/* Đây là hình ảnh giới thiệu mới, nằm dưới banner chính */}
+          {/* ẢNH THAY THẾ CHO ĐOẠN TEXT GIỚI THIỆU */}
           <img 
-            src="/assets/images/nen.jpg" // 1. Đường dẫn ảnh mới của bạn
-            alt="Giới thiệu Gia phả họ Vũ Bá"            // 2. Mô tả ảnh (cho SEO/Accessibility)
-            
-            // --- CÁC THÔNG SỐ CHỈNH SỬA (Bạn hãy thay đổi ở đây) ---
+            src="/assets/images/nen.jpg" 
+            alt="Giới thiệu Gia phả họ Vũ Bá"            
             className="
-              mx-auto               /* Căn giữa ảnh */
-              mt-10                 /* Khoảng cách phía trên (margin-top) */
-              
-              /* 3. CHỈNH SIZE (Độ rộng) */
-              w-full                /* Mặc định trên điện thoại: rộng hết cỡ */
-              max-w-[500px]         /* Độ rộng tối đa (size): Ví dụ 500px */
-              
-              /* 4. CHỈNH ĐỘ MỜ (Opacity) */
-              opacity-100           /* Độ mờ (100 là rõ nét nhất, 0 là trong suốt) */
-              
-              /* 5. TÙY CHỌN KHÁC (Độ bo góc, bóng) */
-              rounded-xl            /* Bo góc ảnh nhẹ */
-              shadow-md             /* Thêm bóng đổ nhẹ */
-              
-              /* Hiệu ứng khi di chuột vào (tùy chọn) */
-              hover:opacity-90 transition-opacity duration-300
+              mx-auto               /* Căn giữa */
+              mt-6                  /* Khoảng cách với banner trên */
+              w-[90%] sm:w-full     /* Co giãn theo màn hình */
+              max-w-[550px]         /* Độ rộng tối đa (Khởi có thể tăng/giảm số này) */
+              opacity-100           /* Độ mờ (0-100) */
+              rounded-xl            /* Bo góc */
+              shadow-sm             /* Bóng đổ nhẹ */
+              object-contain        /* Giữ nguyên tỉ lệ ảnh không bị méo */
+              hover:opacity-95 transition-opacity duration-300
             "
           />
-
-
-          
         </motion.div>
 
         <motion.div
@@ -135,7 +110,6 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
         >
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-16 bg-amber-500/30 blur-2xl rounded-full z-0 hidden sm:block"></div>
 
-          {/* NÚT ĐĂNG NHẬP CHÍNH */}
           <Link
             href="/login"
             className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-white bg-stone-900 border border-stone-800 hover:bg-stone-800 hover:border-stone-700 rounded-2xl shadow-xl shadow-stone-900/10 hover:shadow-2xl hover:shadow-stone-900/20 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden relative"
@@ -146,7 +120,6 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
             </span>
           </Link>
 
-          {/* NÚT XEM GIA PHẢ (LOGIN GUEST) */}
           <button
             onClick={handleGuestLogin}
             className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 rounded-2xl shadow-xl shadow-amber-200/10 hover:shadow-2xl hover:shadow-amber-300/20 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden relative"
@@ -158,7 +131,6 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
           </button>
         </motion.div>
 
-        {/* CÁC TÍNH NĂNG BÊN DƯỚI GIỮ NGUYÊN */}
         <motion.div
           className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-left border-t border-stone-200/50 relative"
           variants={staggerContainer}
