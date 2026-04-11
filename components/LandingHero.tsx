@@ -39,7 +39,6 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
   const router = useRouter();
   const supabase = createClient();
 
-  // HÀM ĐĂNG NHẬP GUEST
   const handleGuestLogin = async () => {
     try {
       const guestEmail = process.env.NEXT_PUBLIC_GUEST_EMAIL;
@@ -78,36 +77,40 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
         animate="visible"
         variants={staggerContainer}
       >
-        <motion.div className="flex flex-col items-center" variants={fadeIn}>
-          {/* BANNER CHÍNH */}
-          <motion.div whileHover={{ scale: 1.02 }} className="mb-6">
+        {/* --- CỤM HÌNH ẢNH (BANNER + NỀN) --- */}
+        <motion.div 
+          className="flex flex-col items-center gap-6" 
+          variants={fadeIn}
+        >
+          {/* 1. Banner chính */}
+          <div className="w-full flex justify-center">
             <img
               src="/assets/images/banner.jpg"
-              alt="GIA PHẢ HỌ VŨ BÁ TỘC - THÁI BÌNH"
+              alt="GIA PHẢ HỌ VŨ BÁ TỘC"
               className="w-full max-w-4xl h-auto rounded-2xl shadow-2xl border-4 border-amber-200"
             />
-          </motion.div>
+          </div>
 
-          {/* ẢNH GIỚI THIỆU (THAY THẾ ĐOẠN TEXT) - SIZE KHỚP BANNER */}
-          <motion.div variants={fadeIn} className="w-full flex justify-center">
+          {/* 2. Ảnh nền giới thiệu (nen.jpg) */}
+          <div className="w-full flex justify-center">
             <img 
               src="/assets/images/nen.jpg" 
-              alt="Giới thiệu Gia phả họ Vũ Bá"            
+              alt="Giới thiệu Gia phả"            
               className="
                 w-full 
-                max-w-4xl           /* Khớp hoàn toàn với banner trên */
+                max-w-4xl           /* Đảm bảo bằng size banner */
                 h-auto 
-                rounded-2xl         /* Bo góc đồng bộ */
+                rounded-2xl 
                 shadow-xl 
-                opacity-100 
+                opacity-100         /* Đã bật độ mờ 100% */
                 object-contain
                 hover:shadow-2xl transition-all duration-500
               "
             />
-          </motion.div>
+          </div>
         </motion.div>
 
-        {/* CỤM NÚT BẤM ĐIỀU HƯỚNG */}
+        {/* --- CỤM NÚT BẤM --- */}
         <motion.div
           className="pt-2 flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0 relative"
           variants={fadeIn}
@@ -131,7 +134,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
           </button>
         </motion.div>
 
-        {/* CÁC TÍNH NĂNG GIỚI THIỆU BÊN DƯỚI */}
+        {/* --- TÍNH NĂNG --- */}
         <motion.div
           className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-left border-t border-stone-200/50 pt-12 relative"
           variants={staggerContainer}
