@@ -27,13 +27,13 @@ export default function FamilyTree({
   personsMap,
   relationships,
   roots,
-  branches, // Giữ nguyên tính năng quản lý nhánh
-  canEdit,   // Giữ nguyên quyền chỉnh sửa
+  branches,
+  canEdit,
 }: {
   personsMap: Map<string, Person>;
   relationships: Relationship[];
   roots: Person[];
-  branches?: any[];
+  branches: any[];
   canEdit?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -45,6 +45,8 @@ export default function FamilyTree({
   const [scale, setScale] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [hideSpouses, setHideSpouses] = useState(false);
+  const [hideMales, setHideMales] = useState(false);
+  const [hideFemales, setHideFemales] = useState(false);
   const [maxDepth, setMaxDepth] = useState<number>(0);
   const [collapsedNodeIds, setCollapsedNodeIds] = useState<Set<string>>(new Set());
   const [isExportingHTML, setIsExportingHTML] = useState(false);
@@ -66,26 +68,49 @@ export default function FamilyTree({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (containerRef.current && roots.length > 0) {
+      const el = containerRef.current;
+      el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+    }
+  }, [roots]);
+
   const handleZoomIn = () => setScale((s) => Math.min(s + 0.1, 2));
   const handleZoomOut = () => setScale((s) => Math.max(s - 0.1, 0.3));
   const handleResetZoom = () => setScale(1);
 
-  // GIỮ NGUYÊN TÍNH NĂNG XUẤT FILE HTML
+  // TÍNH NĂNG XUẤT FILE GỐC
   const exportSimpleHTML = async () => {
-    setIsExportingHTML(true);
     try {
-      const html = generateSimpleFamilyTreeHTML(roots, personsMap, relationships);
-      const blob = new Blob([html], { type: "text/html" });
+      setIsExportingHTML(true);
+      const treeData = roots.map((root) => {
+        const buildNode = (pId: string, vis: Set<string> = new Set(), lvl: number = 0): any => {
+          if (vis.has(pId)) return null;
+          vis.add(pId);
+          const data = getTreeData(pId);
+          if (!data.person) return null;
+          const isCollapsed = collapsedNodeIds.has(pId);
+          const shouldIncludeChildren = maxDepth === 0 || lvl < maxDepth - 1;
+          const children = (shouldIncludeChildren && !isCollapsed)
+            ? data.children.map((c) => buildNode(c.id, new Set(vis), lvl + 1)).filter(Boolean)
+            : [];
+          return { person: data.person, spouses: data.spouses.map((s) => s.person), children, level: lvl };
+        };
+        return buildNode(root.id);
+      }).filter(Boolean);
+
+      const htmlContent = generateSimpleFamilyTreeHTML(treeData, branches);
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `gia-pha-vu-ba-${new Date().toISOString().split("T")[0]}.html`;
+      a.download = `giapha-vuba-${new Date().toISOString().split("T")[0]}.html`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Lỗi xuất file:", error);
+    } catch (err) {
+      console.error("Lỗi xuất HTML:", err);
     } finally {
       setIsExportingHTML(false);
     }
@@ -96,26 +121,31 @@ export default function FamilyTree({
       .filter((r) => r.type === "marriage" && (r.person_a === personId || r.person_b === personId))
       .map((r) => {
         const spouseId = r.person_a === personId ? r.person_b : r.person_a;
-        const person = personsMap.get(spouseId);
-        return person ? { person, note: r.note } : null;
+        const p = personsMap.get(spouseId);
+        return p ? { person: p, note: r.note } : null;
       })
-      .filter((s): s is SpouseData => s !== null && !hideSpouses);
+      .filter((s): s is SpouseData => {
+        if (!s || !s.person || hideSpouses) return false;
+        if (hideMales && s.person.gender === "male") return false;
+        if (hideFemales && s.person.gender === "female") return false;
+        return true;
+      });
 
-    const childRels = relationships.filter((r) => (r.type === "biological_child" || r.type === "adopted_child") && r.person_a === personId);
-
-    const childrenList = (childRels.map((r) => personsMap.get(r.person_b)).filter(Boolean) as Person[])
+    const childrenList = (relationships
+      .filter((r) => (r.type === "biological_child" || r.type === "adopted_child") && r.person_a === personId)
+      .map((r) => personsMap.get(r.person_b))
+      .filter(Boolean) as Person[])
+      .filter((c) => {
+        if (hideMales && c.gender === "male") return false;
+        if (hideFemales && c.gender === "female") return false;
+        return true;
+      })
       .sort((a, b) => {
-        // CẬP NHẬT LOGIC SẮP XẾP: 6, 7, 8 đứng trước, Null đứng sau
-        const aOrder = a.birth_order;
-        const bOrder = b.birth_order;
-
-        if (aOrder !== null && bOrder !== null) return aOrder - bOrder;
-        if (aOrder !== null && bOrder === null) return -1;
-        if (aOrder === null && bOrder !== null) return 1;
-
-        const aYear = a.birth_year ?? 9999;
-        const bYear = b.birth_year ?? 9999;
-        return aYear - bYear;
+        // Ưu tiên sắp xếp theo birth_order (6, 7, 8...), nếu null thì xuống cuối
+        const aOrder = a.birth_order ?? Infinity;
+        const bOrder = b.birth_order ?? Infinity;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+        return (a.birth_year ?? Infinity) - (b.birth_year ?? Infinity);
       });
 
     return { person: personsMap.get(personId)!, spouses: spousesList, children: childrenList };
@@ -133,12 +163,13 @@ export default function FamilyTree({
     return (
       <li key={personId}>
         <div className="node-container inline-flex flex-col items-center">
-          <div className="flex relative z-10 bg-white rounded-2xl shadow-md border border-stone-200/80">
+          <div className="flex relative z-10 bg-white rounded-2xl shadow-md border border-stone-200/80 items-stretch">
             <FamilyNodeCard person={data.person} onClickSetRoot={() => setRootId(data.person.id)} />
             {data.spouses.map((spouseData, idx) => (
               <FamilyNodeCard 
                 key={spouseData.person.id} 
                 isRingVisible={idx === 0} 
+                isPlusVisible={idx > 0}
                 person={spouseData.person} 
                 role={spouseData.person.gender === "male" ? "Chồng" : "Vợ"} 
                 note={spouseData.note} 
@@ -146,8 +177,10 @@ export default function FamilyTree({
               />
             ))}
             {hasChildren && (
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white border border-stone-200/80 rounded-full size-6 flex items-center justify-center shadow-md z-10 cursor-pointer text-stone-500 hover:text-amber-600 transition-colors" 
-                   onClick={(e) => { e.stopPropagation(); setCollapsedNodeIds(prev => { const n = new Set(prev); n.has(personId) ? n.delete(personId) : n.add(personId); return n; }); }}>
+              <div 
+                className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white border border-stone-200/80 rounded-full size-6 flex items-center justify-center shadow-md z-20 cursor-pointer text-stone-500 hover:text-amber-600 transition-colors" 
+                onClick={(e) => { e.stopPropagation(); setCollapsedNodeIds(prev => { const n = new Set(prev); n.has(personId) ? n.delete(personId) : n.add(personId); return n; }); }}
+              >
                 {!isCollapsed ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
               </div>
             )}
@@ -186,53 +219,31 @@ export default function FamilyTree({
     }
   };
 
-  const handleMouseUpOrLeave = () => { setIsPressed(false); setIsDragging(false); };
-  
-  // GIỮ NGUYÊN TÍNH NĂNG CHỐNG CLICK NHẦM KHI ĐANG KÉO
-  const handleClickCapture = (e: React.MouseEvent) => {
-    if (hasDraggedRef.current) {
-      e.stopPropagation();
-      e.preventDefault();
-      hasDraggedRef.current = false;
-    }
-  };
-
   return (
     <div className="w-full h-full relative">
       <style dangerouslySetInnerHTML={{ __html: `
-        .css-tree ul { padding-top: 20px; position: relative; display: flex; justify-content: center; }
-        .css-tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 2px 0 2px; }
-        .css-tree li::before, .css-tree li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 2px solid #d6d3d1; width: 50%; height: 20px; }
+        .css-tree ul { padding-top: 25px; position: relative; display: flex; justify-content: center; }
+        .css-tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 25px 4px 0 4px; }
+        .css-tree li::before, .css-tree li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 2px solid #d6d3d1; width: 50%; height: 25px; }
         .css-tree li::after { right: auto; left: 50%; border-left: 2px solid #d6d3d1; }
         .css-tree li:only-child::after { display: none; }
-        .css-tree li:only-child::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #d6d3d1; height: 20px; }
+        .css-tree li:only-child::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #d6d3d1; height: 25px; width: 0; }
         .css-tree ul:first-child > li { padding-top: 0px; }
         .css-tree ul:first-child > li::before { display: none; }
         .css-tree li:first-child::before, .css-tree li:last-child::after { border: 0 none; }
-        .css-tree li:last-child::before { border-right: 2px solid #d6d3d1; border-radius: 0 8px 0 0; }
-        .css-tree li:first-child::after { border-radius: 8px 0 0 0; }
-        .css-tree ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #d6d3d1; height: 20px; }
-        .node-container { min-width: 100px; }
-        .css-tree .flex.relative.z-10 { gap: 2px; }
+        .css-tree li:last-child::before { border-right: 2px solid #d6d3d1; border-radius: 0 10px 0 0; }
+        .css-tree li:first-child::after { border-radius: 10px 0 0 0; }
+        .css-tree ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #d6d3d1; height: 25px; width: 0; }
+        .node-container { min-width: 120px; }
       `}} />
 
-      {/* PORTALS CHO ĐỘ SÂU (Bên trái) */}
       {depthPortalNode && createPortal(
-        <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full px-3 h-10 transition-all hover:border-amber-200">
-          <span className="text-sm font-semibold text-stone-600">Độ sâu:</span>
-          <input 
-            type="number" 
-            min="0" 
-            value={maxDepth === 0 ? "" : maxDepth} 
-            onChange={(e) => setMaxDepth(e.target.value ? parseInt(e.target.value) : 0)} 
-            className="w-10 bg-transparent text-sm font-medium text-amber-700 text-center focus:outline-none" 
-            placeholder="∞" 
-          />
-        </div>, 
-        depthPortalNode
+        <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full px-3 h-10">
+          <span className="text-sm font-semibold text-stone-600">Đời:</span>
+          <input type="number" min="0" value={maxDepth === 0 ? "" : maxDepth} onChange={(e) => setMaxDepth(e.target.value ? parseInt(e.target.value) : 0)} className="w-8 bg-transparent text-sm font-medium text-amber-700 text-center focus:outline-none" placeholder="∞" />
+        </div>, depthPortalNode
       )}
-      
-      {/* PORTALS CHO TOOLBAR & EXPORT (Bên phải) */}
+
       {portalNode && createPortal(
         <div className="flex flex-wrap justify-center items-center gap-2 w-max" ref={filtersRef}>
           <div className="flex items-center bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full h-10 overflow-hidden">
@@ -240,26 +251,26 @@ export default function FamilyTree({
             <button onClick={handleResetZoom} className="px-2 h-full text-xs font-medium min-w-[50px] border-x border-stone-200/50">{Math.round(scale * 100)}%</button>
             <button onClick={handleZoomIn} className="px-3 h-full hover:bg-stone-100/50 text-stone-600"><ZoomIn className="size-4" /></button>
           </div>
+          <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-2 px-4 h-10 rounded-full font-semibold text-sm border transition-all ${showFilters ? "bg-amber-100 text-amber-800 border-amber-200" : "bg-white/80 text-stone-600 border-stone-200/60"}`}><Filter className="size-4" /> Lọc</button>
           
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-2 px-4 h-10 rounded-full font-semibold text-sm border transition-all ${showFilters ? "bg-amber-100 text-amber-800 border-amber-200 shadow-inner" : "bg-white/80 text-stone-600 border-stone-200/60 backdrop-blur-md"}`}><Filter className="size-4" /> Lọc</button>
-            
-            <button onClick={exportSimpleHTML} disabled={isExportingHTML} className="flex items-center gap-2 px-4 h-10 rounded-full bg-white/80 text-stone-600 border border-stone-200/60 font-semibold text-sm shadow-sm hover:bg-white transition-all disabled:opacity-50">
-              <Code className="size-4" /> {isExportingHTML ? "Đang xuất..." : "Xuất HTML"}
+            <button onClick={exportSimpleHTML} disabled={isExportingHTML} className="flex items-center gap-2 px-4 h-10 rounded-full bg-white/80 text-stone-600 border border-stone-200/60 font-semibold text-sm shadow-sm hover:bg-white transition-all">
+              <Code className="size-4" /> {isExportingHTML ? "..." : "Xuất HTML"}
             </button>
-            <ExportButton containerId="export-container" fileName="gia-pha-vu-ba" />
+            <ExportButton treeData={roots.map(r => r.id)} branches={branches} />
           </div>
 
           <AnimatePresence>
             {showFilters && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute top-full right-0 mt-2 w-48 bg-white/95 backdrop-blur-xl shadow-xl border border-stone-200/60 rounded-2xl p-4 flex flex-col gap-3 z-50">
-                <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={!showAvatar} onChange={(e) => setShowAvatar(!e.target.checked)} className="rounded size-4 text-amber-600" /> Ẩn chân dung</label>
-                <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={hideSpouses} onChange={(e) => setHideSpouses(e.target.checked)} className="rounded size-4 text-amber-600" /> Ẩn dâu/rể</label>
+                <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={!showAvatar} onChange={(e) => setShowAvatar(!e.target.checked)} className="rounded size-4" /> Ẩn chân dung</label>
+                <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={hideSpouses} onChange={(e) => setHideSpouses(e.target.checked)} className="rounded size-4" /> Ẩn dâu/rể</label>
+                <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={hideMales} onChange={(e) => setHideMales(e.target.checked)} className="rounded size-4" /> Ẩn Nam</label>
+                <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={hideFemales} onChange={(e) => setHideFemales(e.target.checked)} className="rounded size-4" /> Ẩn Nữ</label>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>, 
-        portalNode
+        </div>, portalNode
       )}
 
       <div 
@@ -267,9 +278,8 @@ export default function FamilyTree({
         className={`w-full h-full overflow-auto bg-stone-50 ${isPressed ? "cursor-grabbing" : "cursor-grab"}`} 
         onMouseDown={handleMouseDown} 
         onMouseMove={handleMouseMove} 
-        onMouseUp={handleMouseUpOrLeave} 
-        onMouseLeave={handleMouseUpOrLeave}
-        onClickCapture={handleClickCapture}
+        onMouseUp={() => setIsPressed(false)} 
+        onMouseLeave={() => setIsPressed(false)}
       >
         <div id="export-container" className="w-max min-w-full mx-auto p-8 css-tree" style={{ transform: `scale(${scale})`, transformOrigin: "top center" }}>
           <ul>{roots.map((root) => <React.Fragment key={root.id}>{renderTreeNode(root.id)}</React.Fragment>)}</ul>
