@@ -27,10 +27,14 @@ export default function FamilyTree({
   personsMap,
   relationships,
   roots,
+  branches, // Giữ nguyên tính năng quản lý nhánh
+  canEdit,   // Giữ nguyên quyền chỉnh sửa
 }: {
   personsMap: Map<string, Person>;
   relationships: Relationship[];
   roots: Person[];
+  branches?: any[];
+  canEdit?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPressed, setIsPressed] = useState(false);
@@ -43,7 +47,7 @@ export default function FamilyTree({
   const [hideSpouses, setHideSpouses] = useState(false);
   const [maxDepth, setMaxDepth] = useState<number>(0);
   const [collapsedNodeIds, setCollapsedNodeIds] = useState<Set<string>>(new Set());
-  const [isExportingHTML, setIsExportingHTML] = useState(false); // Đã thêm lại biến này
+  const [isExportingHTML, setIsExportingHTML] = useState(false);
 
   const { showAvatar, setShowAvatar, setRootId } = useDashboard();
   const filtersRef = useRef<HTMLDivElement>(null);
@@ -66,7 +70,7 @@ export default function FamilyTree({
   const handleZoomOut = () => setScale((s) => Math.max(s - 0.1, 0.3));
   const handleResetZoom = () => setScale(1);
 
-  // KHÔI PHỤC HÀM XUẤT HTML GỐC
+  // GIỮ NGUYÊN TÍNH NĂNG XUẤT FILE HTML
   const exportSimpleHTML = async () => {
     setIsExportingHTML(true);
     try {
@@ -75,13 +79,13 @@ export default function FamilyTree({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `gia-pha-hieu-nghia-${new Date().toISOString().split("T")[0]}.html`;
+      a.download = `gia-pha-vu-ba-${new Date().toISOString().split("T")[0]}.html`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Lỗi xuất HTML:", error);
+      console.error("Lỗi xuất file:", error);
     } finally {
       setIsExportingHTML(false);
     }
@@ -92,20 +96,23 @@ export default function FamilyTree({
       .filter((r) => r.type === "marriage" && (r.person_a === personId || r.person_b === personId))
       .map((r) => {
         const spouseId = r.person_a === personId ? r.person_b : r.person_a;
-        return { person: personsMap.get(spouseId)!, note: r.note };
+        const person = personsMap.get(spouseId);
+        return person ? { person, note: r.note } : null;
       })
-      .filter((s) => s.person && !hideSpouses);
+      .filter((s): s is SpouseData => s !== null && !hideSpouses);
 
     const childRels = relationships.filter((r) => (r.type === "biological_child" || r.type === "adopted_child") && r.person_a === personId);
 
     const childrenList = (childRels.map((r) => personsMap.get(r.person_b)).filter(Boolean) as Person[])
       .sort((a, b) => {
+        // CẬP NHẬT LOGIC SẮP XẾP: 6, 7, 8 đứng trước, Null đứng sau
         const aOrder = a.birth_order;
         const bOrder = b.birth_order;
-        // Logic ưu tiên người có số thứ tự đứng trước (bên trái)
+
         if (aOrder !== null && bOrder !== null) return aOrder - bOrder;
         if (aOrder !== null && bOrder === null) return -1;
         if (aOrder === null && bOrder !== null) return 1;
+
         const aYear = a.birth_year ?? 9999;
         const bYear = b.birth_year ?? 9999;
         return aYear - bYear;
@@ -181,6 +188,7 @@ export default function FamilyTree({
 
   const handleMouseUpOrLeave = () => { setIsPressed(false); setIsDragging(false); };
   
+  // GIỮ NGUYÊN TÍNH NĂNG CHỐNG CLICK NHẦM KHI ĐANG KÉO
   const handleClickCapture = (e: React.MouseEvent) => {
     if (hasDraggedRef.current) {
       e.stopPropagation();
@@ -208,9 +216,9 @@ export default function FamilyTree({
         .css-tree .flex.relative.z-10 { gap: 2px; }
       `}} />
 
-      {/* PORTALS TOOLBAR */}
+      {/* PORTALS CHO ĐỘ SÂU (Bên trái) */}
       {depthPortalNode && createPortal(
-        <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full px-3 h-10">
+        <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full px-3 h-10 transition-all hover:border-amber-200">
           <span className="text-sm font-semibold text-stone-600">Độ sâu:</span>
           <input 
             type="number" 
@@ -224,6 +232,7 @@ export default function FamilyTree({
         depthPortalNode
       )}
       
+      {/* PORTALS CHO TOOLBAR & EXPORT (Bên phải) */}
       {portalNode && createPortal(
         <div className="flex flex-wrap justify-center items-center gap-2 w-max" ref={filtersRef}>
           <div className="flex items-center bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full h-10 overflow-hidden">
@@ -233,19 +242,19 @@ export default function FamilyTree({
           </div>
           
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-2 px-4 h-10 rounded-full font-semibold text-sm border transition-all ${showFilters ? "bg-amber-100 text-amber-800 border-amber-200" : "bg-white/80 text-stone-600 border-stone-200/60 backdrop-blur-md"}`}><Filter className="size-4" /> Lọc</button>
+            <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-2 px-4 h-10 rounded-full font-semibold text-sm border transition-all ${showFilters ? "bg-amber-100 text-amber-800 border-amber-200 shadow-inner" : "bg-white/80 text-stone-600 border-stone-200/60 backdrop-blur-md"}`}><Filter className="size-4" /> Lọc</button>
             
             <button onClick={exportSimpleHTML} disabled={isExportingHTML} className="flex items-center gap-2 px-4 h-10 rounded-full bg-white/80 text-stone-600 border border-stone-200/60 font-semibold text-sm shadow-sm hover:bg-white transition-all disabled:opacity-50">
               <Code className="size-4" /> {isExportingHTML ? "Đang xuất..." : "Xuất HTML"}
             </button>
-            <ExportButton containerId="export-container" fileName="gia-pha-hinh-anh" />
+            <ExportButton containerId="export-container" fileName="gia-pha-vu-ba" />
           </div>
 
           <AnimatePresence>
             {showFilters && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute top-full right-0 mt-2 w-48 bg-white/95 backdrop-blur-xl shadow-xl border border-stone-200/60 rounded-2xl p-4 flex flex-col gap-3 z-50">
-                <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={!showAvatar} onChange={(e) => setShowAvatar(!e.target.checked)} className="rounded size-4" /> Ẩn ảnh chân dung</label>
-                <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={hideSpouses} onChange={(e) => setHideSpouses(e.target.checked)} className="rounded size-4" /> Ẩn dâu/rể</label>
+                <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={!showAvatar} onChange={(e) => setShowAvatar(!e.target.checked)} className="rounded size-4 text-amber-600" /> Ẩn chân dung</label>
+                <label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer"><input type="checkbox" checked={hideSpouses} onChange={(e) => setHideSpouses(e.target.checked)} className="rounded size-4 text-amber-600" /> Ẩn dâu/rể</label>
               </motion.div>
             )}
           </AnimatePresence>
