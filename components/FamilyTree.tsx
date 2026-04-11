@@ -43,12 +43,12 @@ export default function FamilyTree({
   const [hideSpouses, setHideSpouses] = useState(false);
   const [maxDepth, setMaxDepth] = useState<number>(0);
   const [collapsedNodeIds, setCollapsedNodeIds] = useState<Set<string>>(new Set());
+  const [isExportingHTML, setIsExportingHTML] = useState(false); // Đã thêm lại biến này
 
   const { showAvatar, setShowAvatar, setRootId } = useDashboard();
   const filtersRef = useRef<HTMLDivElement>(null);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
   const [depthPortalNode, setDepthPortalNode] = useState<HTMLElement | null>(null);
-  const [isExportingHTML, setIsExportingHTML] = useState(false);
 
   useEffect(() => {
     setPortalNode(document.getElementById("tree-toolbar-portal"));
@@ -66,6 +66,7 @@ export default function FamilyTree({
   const handleZoomOut = () => setScale((s) => Math.max(s - 0.1, 0.3));
   const handleResetZoom = () => setScale(1);
 
+  // KHÔI PHỤC HÀM XUẤT HTML GỐC
   const exportSimpleHTML = async () => {
     setIsExportingHTML(true);
     try {
@@ -74,13 +75,13 @@ export default function FamilyTree({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `gia-pha-${new Date().toISOString().split("T")[0]}.html`;
+      a.download = `gia-pha-hieu-nghia-${new Date().toISOString().split("T")[0]}.html`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Export error:", error);
+      console.error("Lỗi xuất HTML:", error);
     } finally {
       setIsExportingHTML(false);
     }
@@ -99,9 +100,9 @@ export default function FamilyTree({
 
     const childrenList = (childRels.map((r) => personsMap.get(r.person_b)).filter(Boolean) as Person[])
       .sort((a, b) => {
-        // CẬP NHẬT QUAN TRỌNG: Xử lý 8 đứng trước 3 người Null
         const aOrder = a.birth_order;
         const bOrder = b.birth_order;
+        // Logic ưu tiên người có số thứ tự đứng trước (bên trái)
         if (aOrder !== null && bOrder !== null) return aOrder - bOrder;
         if (aOrder !== null && bOrder === null) return -1;
         if (aOrder === null && bOrder !== null) return 1;
@@ -123,7 +124,7 @@ export default function FamilyTree({
     const isCollapsed = collapsedNodeIds.has(personId);
 
     return (
-      <li>
+      <li key={personId}>
         <div className="node-container inline-flex flex-col items-center">
           <div className="flex relative z-10 bg-white rounded-2xl shadow-md border border-stone-200/80">
             <FamilyNodeCard person={data.person} onClickSetRoot={() => setRootId(data.person.id)} />
@@ -180,7 +181,6 @@ export default function FamilyTree({
 
   const handleMouseUpOrLeave = () => { setIsPressed(false); setIsDragging(false); };
   
-  // KHÔI PHỤC: Chặn click khi đang kéo cây
   const handleClickCapture = (e: React.MouseEvent) => {
     if (hasDraggedRef.current) {
       e.stopPropagation();
@@ -192,7 +192,7 @@ export default function FamilyTree({
   return (
     <div className="w-full h-full relative">
       <style dangerouslySetInnerHTML={{ __html: `
-        .css-tree ul { padding-top: 20px; position: relative; display: flex; justify-content: center; transition: all 0.3s; }
+        .css-tree ul { padding-top: 20px; position: relative; display: flex; justify-content: center; }
         .css-tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 2px 0 2px; }
         .css-tree li::before, .css-tree li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 2px solid #d6d3d1; width: 50%; height: 20px; }
         .css-tree li::after { right: auto; left: 50%; border-left: 2px solid #d6d3d1; }
@@ -208,7 +208,7 @@ export default function FamilyTree({
         .css-tree .flex.relative.z-10 { gap: 2px; }
       `}} />
 
-      {/* PORTALS CHO ĐỘ SÂU */}
+      {/* PORTALS TOOLBAR */}
       {depthPortalNode && createPortal(
         <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full px-3 h-10">
           <span className="text-sm font-semibold text-stone-600">Độ sâu:</span>
@@ -224,7 +224,6 @@ export default function FamilyTree({
         depthPortalNode
       )}
       
-      {/* PORTALS CHO TOOLBAR & FILTERS */}
       {portalNode && createPortal(
         <div className="flex flex-wrap justify-center items-center gap-2 w-max" ref={filtersRef}>
           <div className="flex items-center bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full h-10 overflow-hidden">
