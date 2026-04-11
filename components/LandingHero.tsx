@@ -94,7 +94,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
           {/* 2. Ảnh nền giới thiệu (nen.jpg) */}
           <div className="w-full flex justify-center">
             <img 
-              src="/assets/images/nen.jpg" 
+              src="/assets/images/Nen.jpg" 
               alt="Giới thiệu Gia phả"            
               className="
                 w-full 
