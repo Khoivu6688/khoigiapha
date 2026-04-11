@@ -81,11 +81,11 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
       >
         {/* --- 1. KHỐI HÌNH ẢNH (BANNER + ẢNH GIỚI THIỆU) --- */}
         <motion.div 
-          className="flex flex-col items-center gap-4" 
+          className="flex flex-col items-center gap-0 relative" 
           variants={fadeIn}
         >
           {/* Banner chính trên cùng */}
-          <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center relative z-0">
             <img
               src="/assets/images/banner.jpg"
               alt="GIA PHẢ HỌ VŨ BÁ TỘC"
@@ -93,10 +93,10 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
             />
           </div>
 
-          {/* Ảnh nền giới thiệu đè lên (nen.jpg) */}
-          <div className="w-full flex justify-center mt-2">
+          {/* ẢNH NỀN GIỚI THIỆU ĐÈ LÊN BANNER (Tên file: Nen.jpg) */}
+          <div className="w-full flex justify-center -mt-6 relative z-10"> {/* Đẩy lề âm đè chân lên banner */}
             <img 
-              src="/assets/images/nen.jpg" 
+              src="/assets/images/Nen.jpg"     /* ĐÃ CẬP NHẬT TÊN FILE CHÍNH XÁC */
               alt="Giới thiệu Gia phả"            
               className="
                 w-full 
@@ -107,17 +107,19 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
                 object-contain
                 opacity-70         /* Độ mờ 70% */
                 hover:opacity-100 transition-opacity duration-500
+                /* Thêm đường viền mờ cho khối ảnh này dễ nhìn hơn */
+                border border-amber-100/30
               "
             />
           </div>
         </motion.div>
 
-        {/* --- 2. CỤM NÚT BẤM (ĐẨY LÊN CAO CHỒNG LÊN ẢNH) --- */}
+        {/* --- 2. CỤM NÚT BẤM (ĐẨY LÊN CAO CHỒNG LÊN ẢNH GIỚI THIỆU) --- */}
         <motion.div
           className="
             flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0 relative 
-            -mt-24 sm:-mt-32     /* ĐẨY LÊN CAO: Vượt lên trên dòng chữ phụng lập */
-            z-20                /* Nằm trên tầng ảnh */
+            -mt-24 sm:-mt-32     /* ĐẨY LÊN CAO: Nằm trên tầng ảnh Nen.jpg (Z-10) */
+            z-30                /* Đảm bảo nút nằm trên tầng ảnhnen.jpg (z-10) */
           "
           initial="hidden"
           animate="visible"
@@ -137,7 +139,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
             </Link>
           </motion.div>
 
-          {/* Nút Xem gia phả (Glassmorphism style) */}
+          {/* Nút Xem gia phả (Guest) */}
           <motion.div variants={fadeIn} className="w-full sm:w-auto z-10">
             <button
               onClick={handleGuestLogin}
