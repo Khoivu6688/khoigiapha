@@ -39,6 +39,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
   const router = useRouter();
   const supabase = createClient();
 
+  // HÀM ĐĂNG NHẬP GUEST
   const handleGuestLogin = async () => {
     try {
       const guestEmail = process.env.NEXT_PUBLIC_GUEST_EMAIL;
@@ -78,7 +79,8 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
         variants={staggerContainer}
       >
         <motion.div className="flex flex-col items-center" variants={fadeIn}>
-          <motion.div whileHover={{ scale: 1.05 }} className="mb-8">
+          {/* BANNER CHÍNH */}
+          <motion.div whileHover={{ scale: 1.02 }} className="mb-6">
             <img
               src="/assets/images/banner.jpg"
               alt="GIA PHẢ HỌ VŨ BÁ TỘC - THÁI BÌNH"
@@ -86,91 +88,10 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
             />
           </motion.div>
 
-          {/* ẢNH THAY THẾ CHO ĐOẠN TEXT GIỚI THIỆU */}
-          <img 
-            src="/assets/images/nen.jpg" 
-            alt="Giới thiệu Gia phả họ Vũ Bá"            
-            className="
-              mx-auto               /* Căn giữa */
-              mt-6                  /* Khoảng cách với banner trên */
-              w-[90%] sm:w-full     /* Co giãn theo màn hình */
-              max-w-[550px]         /* Độ rộng tối đa (Khởi có thể tăng/giảm số này) */
-              opacity-100           /* Độ mờ (0-100) */
-              rounded-xl            /* Bo góc */
-              shadow-sm             /* Bóng đổ nhẹ */
-              object-contain        /* Giữ nguyên tỉ lệ ảnh không bị méo */
-              hover:opacity-95 transition-opacity duration-300
-            "
-          />
-        </motion.div>
-
-        <motion.div
-          className="pt-6 flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0 relative"
-          variants={fadeIn}
-        >
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-16 bg-amber-500/30 blur-2xl rounded-full z-0 hidden sm:block"></div>
-
-          <Link
-            href="/login"
-            className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-white bg-stone-900 border border-stone-800 hover:bg-stone-800 hover:border-stone-700 rounded-2xl shadow-xl shadow-stone-900/10 hover:shadow-2xl hover:shadow-stone-900/20 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden relative"
-          >
-            <span className="relative z-10 flex items-center gap-3">
-              Đăng nhập Admin
-              <ArrowRight className="size-5 group-hover:translate-x-1.5 transition-transform" />
-            </span>
-          </Link>
-
-          <button
-            onClick={handleGuestLogin}
-            className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 rounded-2xl shadow-xl shadow-amber-200/10 hover:shadow-2xl hover:shadow-amber-300/20 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden relative"
-          >
-            <span className="relative z-10 flex items-center gap-3">
-              Xem gia phả
-              <Users className="size-5 group-hover:scale-110 transition-transform" />
-            </span>
-          </button>
-        </motion.div>
-
-        <motion.div
-          className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-left border-t border-stone-200/50 relative"
-          variants={staggerContainer}
-        >
-          {[
-            {
-              icon: <Users className="size-6 text-amber-700" />,
-              title: "Quản lý Thành viên",
-              desc: "Cập nhật thông tin chi tiết, tiểu sử và hình ảnh của từng thành viên trong dòng họ một cách nhanh chóng và bảo mật.",
-            },
-            {
-              icon: <Network className="size-6 text-amber-700" />,
-              title: "Sơ đồ Sáng tạo",
-              desc: "Xem trực quan sơ đồ phả hệ, thế hệ và mối quan hệ gia đình với giao diện cây hiện đại, dễ thao tác.",
-            },
-            {
-              icon: <ShieldCheck className="size-6 text-amber-700" />,
-              title: "Bảo mật Tối đa",
-              desc: "Dữ liệu riêng tư được phân quyền chặt chẽ, bảo vệ an toàn trên hệ thống đám mây.",
-            },
-          ].map((feature, idx) => (
-            <motion.div
-              key={idx}
-              variants={fadeIn}
-              whileHover={{ y: -5 }}
-              className="bg-white/70 backdrop-blur-xl p-8 rounded-3xl border border-white/80 shadow-sm hover:shadow-md transition-all duration-500 flex flex-col items-start group relative overflow-hidden"
-            >
-              <div className="p-3.5 bg-white rounded-2xl mb-6 ring-1 ring-stone-100 group-hover:scale-110 transition-all duration-300 relative z-10">
-                {feature.icon}
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-3 font-serif relative z-10">
-                {feature.title}
-              </h3>
-              <p className="text-stone-600 text-base leading-relaxed relative z-10">
-                {feature.desc}
-              </p>
-            </motion.div>
-          ))}
-        </motion.div>
-      </motion.div>
-    </>
-  );
-}
+          {/* ẢNH GIỚI THIỆU (THAY THẾ ĐOẠN TEXT) - SIZE KHỚP BANNER */}
+          <motion.div variants={fadeIn} className="w-full flex justify-center">
+            <img 
+              src="/assets/images/nen.jpg" 
+              alt="Giới thiệu Gia phả họ Vũ Bá"            
+              className="
+                w-full
