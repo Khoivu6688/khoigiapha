@@ -3,32 +3,28 @@
 import { motion, Variants } from "framer-motion";
 import {
   ArrowRight,
-  Network,
-  ShieldCheck,
   Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
-// Hiệu ứng hiện hình cho từng phần tử
 const fadeIn: Variants = {
-  hidden: { opacity: 0, y: 15 },
+  hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] },
   },
 };
 
-// Hiệu ứng hiện lần lượt cho các nút
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.05,
+      staggerChildren: 0.15,
+      delayChildren: 0.1,
     },
   },
 };
@@ -72,130 +68,80 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
   };
 
   return (
-    <>
+    <div className="w-full flex justify-center px-4">
       <motion.div
-        className="max-w-5xl text-center w-full relative z-10 mt-0"
+        className="max-w-4xl w-full flex flex-col items-center -mt-10 sm:-mt-16" // Đẩy toàn bộ khối lên sát đỉnh
         initial="hidden"
         animate="visible"
         variants={staggerContainer}
       >
-        {/* --- 1. KHỐI HÌNH ẢNH (BANNER + ẢNH GIỚI THIỆU) --- */}
-        <motion.div 
-          className="flex flex-col items-center gap-0 relative" 
-          variants={fadeIn}
-        >
-          {/* Banner chính trên cùng */}
-          <div className="w-full flex justify-center relative z-0">
+        {/* --- PHẦN HÌNH ẢNH --- */}
+        <div className="w-full relative">
+          {/* Banner chính */}
+          <motion.div variants={fadeIn} className="relative z-0">
             <img
               src="/assets/images/banner.jpg"
               alt="GIA PHẢ HỌ VŨ BÁ TỘC"
-              className="w-full max-w-4xl h-auto rounded-2xl shadow-2xl border-4 border-amber-200"
+              className="w-full h-auto rounded-t-2xl shadow-lg border-x-4 border-t-4 border-amber-200/50"
             />
-          </div>
+          </motion.div>
 
-          {/* ẢNH NỀN GIỚI THIỆU ĐÈ LÊN BANNER (Tên file: Nen.jpg) */}
-          <div className="w-full flex justify-center -mt-6 relative z-10"> {/* Đẩy lề âm đè chân lên banner */}
+          {/* Ảnh nội dung (Nen.jpg) */}
+          <motion.div variants={fadeIn} className="relative z-0 -mt-1"> 
             <img 
-              src="/assets/images/Nen.jpg"     /* ĐÃ CẬP NHẬT TÊN FILE CHÍNH XÁC */
+              src="/assets/images/Nen.jpg" 
               alt="Giới thiệu Gia phả"            
               className="
                 w-full 
-                max-w-4xl 
                 h-auto 
-                rounded-2xl 
-                shadow-xl 
+                rounded-b-2xl 
+                shadow-2xl 
                 object-contain
-                opacity-70         /* Độ mờ 70% */
-                hover:opacity-100 transition-opacity duration-500
-                /* Thêm đường viền mờ cho khối ảnh này dễ nhìn hơn */
-                border border-amber-100/30
+                opacity-60         /* Đã chỉnh độ mờ 60% */
+                border-x-4 border-b-4 border-amber-200/30
               "
             />
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* --- 2. CỤM NÚT BẤM (ĐẨY LÊN CAO CHỒNG LÊN ẢNH GIỚI THIỆU) --- */}
-        <motion.div
-          className="
-            flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0 relative 
-            -mt-24 sm:-mt-32     /* ĐẨY LÊN CAO: Nằm trên tầng ảnh Nen.jpg (Z-10) */
-            z-30                /* Đảm bảo nút nằm trên tầng ảnhnen.jpg (z-10) */
-          "
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-        >
-          {/* Vệt sáng mờ phía sau giúp nút nổi bật trên nền ảnh phức tạp */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-28 bg-white/40 blur-3xl rounded-full z-0"></div>
+          {/* --- CỤM NÚT BẤM (Nằm trong relative của ảnh để kiểm soát vị trí) --- */}
+          <motion.div
+            className="
+              absolute bottom-8 left-0 right-0     /* Đưa nút vào trong khung ảnh */
+              flex flex-col sm:flex-row gap-4 justify-center items-center px-4
+              z-10
+            "
+            variants={fadeIn}
+          >
+            {/* Hiệu ứng nền mờ dưới nút để nổi bật chữ */}
+            <div className="absolute inset-0 bg-white/10 blur-2xl rounded-full -z-10 mx-auto w-2/3 h-20"></div>
 
-          {/* Nút Admin */}
-          <motion.div variants={fadeIn} className="w-full sm:w-auto z-10">
             <Link
               href="/login"
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-white bg-stone-900 border border-stone-800 hover:bg-stone-800 hover:border-stone-700 rounded-2xl shadow-2xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-3.5 text-base font-bold text-white bg-stone-900/90 hover:bg-stone-800 rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
             >
               Đăng nhập Admin
-              <ArrowRight className="size-5 group-hover:translate-x-1.5 transition-transform" />
+              <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-          </motion.div>
 
-          {/* Nút Xem gia phả (Guest) */}
-          <motion.div variants={fadeIn} className="w-full sm:w-auto z-10">
             <button
               onClick={handleGuestLogin}
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-amber-900 bg-white/80 backdrop-blur-md border border-amber-200 hover:bg-amber-100 hover:border-amber-300 rounded-2xl shadow-2xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-3.5 text-base font-bold text-amber-900 bg-white/90 backdrop-blur-sm border border-amber-200 hover:bg-amber-50 rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
             >
               Xem gia phả
-              <Users className="size-5 group-hover:scale-110 transition-transform" />
+              <Users className="size-4 group-hover:scale-110 transition-transform" />
             </button>
           </motion.div>
-        </motion.div>
+        </div>
 
-        {/* --- 3. CÁC TÍNH NĂNG (CODE DỰ PHÒNG - ĐÃ ĐÓNG BĂNG) --- */}
-        {/* <motion.div
-          className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-left border-t border-stone-200/50 pt-12 relative"
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
+        {/* --- DÒNG CHỮ PHỤNG LẬP (Nằm dưới nút, tách biệt hẳn) --- */}
+        <motion.p 
+          variants={fadeIn}
+          className="mt-6 text-stone-500 font-medium text-sm sm:text-base italic"
         >
-          {[
-            {
-              icon: <Users className="size-6 text-amber-700" />,
-              title: "Quản lý Thành viên",
-              desc: "Cập nhật thông tin chi tiết, tiểu sử và hình ảnh của từng thành viên trong dòng họ một cách nhanh chóng và bảo mật.",
-            },
-            {
-              icon: <Network className="size-6 text-amber-700" />,
-              title: "Sơ đồ Sáng tạo",
-              desc: "Xem trực quan sơ đồ phả hệ, thế hệ và mối quan hệ gia đình với giao diện cây hiện đại, dễ thao tác.",
-            },
-            {
-              icon: <ShieldCheck className="size-6 text-amber-700" />,
-              title: "Bảo mật Tối đa",
-              desc: "Dữ liệu riêng tư được phân quyền chặt chẽ, bảo vệ an toàn tuyệt đối trên hệ thống điện toán đám mây.",
-            },
-          ].map((feature, idx) => (
-            <motion.div
-              key={idx}
-              variants={fadeIn}
-              whileHover={{ y: -5 }}
-              className="bg-white/70 backdrop-blur-xl p-8 rounded-3xl border border-white/80 shadow-sm hover:shadow-md transition-all duration-500 flex flex-col items-start group"
-            >
-              <div className="p-3.5 bg-white rounded-2xl mb-6 ring-1 ring-stone-100 group-hover:scale-110 transition-all duration-300">
-                {feature.icon}
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-3 font-serif">
-                {feature.title}
-              </h3>
-              <p className="text-stone-600 text-base leading-relaxed">
-                {feature.desc}
-              </p>
-            </motion.div>
-          ))}
-        </motion.div> 
-        */}
+          VŨ VĂN KHỞI - phụng lập năm Bính Ngọ, 2026
+        </motion.p>
 
       </motion.div>
-    </>
+    </div>
   );
 }
