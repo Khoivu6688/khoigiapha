@@ -9,6 +9,8 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // Quan trọng: Để điều hướng trang
+import { createClient } from "@/utils/supabase/client"; // Quan trọng: Để kết nối Database
 
 const fadeIn: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -35,28 +37,31 @@ interface LandingHeroProps {
 }
 
 export default function LandingHero({ siteName }: LandingHeroProps) {
-// --- PHẦN MỚI THÊM: LOGIC ĐĂNG NHẬP GUEST ---
+  // --- PHẦN LOGIC ĐĂNG NHẬP GUEST (KHỞI MỚI THÊM) ---
   const router = useRouter();
-  const { createClient } = require("@/utils/supabase/client"); // Dùng require để tránh xung đột import nếu cần
   const supabase = createClient();
 
   const handleGuestLogin = async () => {
     try {
+      // Gọi lệnh đăng nhập ẩn danh của Supabase để lấy Session
       const { data, error } = await supabase.auth.signInAnonymously();
+      
       if (error) {
         console.error("Lỗi đăng nhập khách:", error.message);
+        alert("Không thể truy cập: " + error.message);
         return;
       }
+
       if (data?.user) {
-        router.push("/public"); // Chuyển vào trang gia phả sau khi login thành công
+        // Nếu có user (guest), chuyển hướng vào trang công khai
+        router.push("/public"); 
       }
     } catch (err) {
       console.error("Lỗi hệ thống:", err);
     }
   };
-  // ------------------------------------------  
-  
-  
+  // ------------------------------------------------
+
   return (
     <>
       <motion.div
@@ -78,7 +83,8 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
             Gìn giữ và lưu truyền những giá trị, cội nguồn và truyền thống tốt
             đẹp của dòng họ cho các thế hệ mai sau. Xem gia phả công khai hoặc
             đăng nhập để quản lý.
-            VŨ VĂN KHỞI - phụng lập năm Bính ngọ, 2026
+            <br />
+            <strong>VŨ VĂN KHỞI - phụng lập năm Bính ngọ, 2026</strong>
           </p>
         </motion.div>
 
@@ -86,49 +92,42 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
           className="pt-6 flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0 relative"
           variants={fadeIn}
         >
-          {/* Subtle glow behind button */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-16 bg-amber-500/30 blur-2xl rounded-full z-0 hidden sm:block"></div>
 
+          {/* NÚT ĐĂNG NHẬP ADMIN */}
           <Link
             href="/login"
             className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-white bg-stone-900 border border-stone-800 hover:bg-stone-800 hover:border-stone-700 rounded-2xl shadow-xl shadow-stone-900/10 hover:shadow-2xl hover:shadow-stone-900/20 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden relative"
           >
             <span className="relative z-10 flex items-center gap-3">
-              Đăng nhập
+              Đăng nhập Admin
               <ArrowRight className="size-5 group-hover:translate-x-1.5 transition-transform" />
             </span>
           </Link>
-{/*
+
+          {/* CODE GỐC DÙNG LINK (ĐÃ COMMENT LẠI):
           <Link
             href="/public"
-            className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 rounded-2xl shadow-xl shadow-amber-200/10 hover:shadow-2xl hover:shadow-amber-300/20 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden relative"
+            className="..."
           >
-            <span className="relative z-10 flex items-center gap-3">
-              Xem gia phả
-              <Users className="size-5 group-hover:scale-110 transition-transform" />
-            </span>
+            Xem gia phả
           </Link>
-*/}
-{/* NÚT MỚI: Thực hiện đăng nhập Guest thay vì chỉ chuyển link */}
+          */}
+
+          {/* NÚT XEM GIA PHẢ MỚI (DÙNG GUEST LOGIN) */}
           <button
             onClick={handleGuestLogin}
             className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 rounded-2xl shadow-xl shadow-amber-200/10 hover:shadow-2xl hover:shadow-amber-300/20 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden relative"
           >
             <span className="relative z-10 flex items-center gap-3">
-              Xem gia phả
+              Xem gia phả (Khách)
               <Users className="size-5 group-hover:scale-110 transition-transform" />
             </span>
           </button>
-
-          
-
-
-          
-        
         </motion.div>
 
         <motion.div
-          className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-left  border-t border-stone-200/50 relative"
+          className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-left border-t border-stone-200/50 relative"
           variants={staggerContainer}
         >
           {[
