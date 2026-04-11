@@ -35,6 +35,28 @@ interface LandingHeroProps {
 }
 
 export default function LandingHero({ siteName }: LandingHeroProps) {
+// --- PHẦN MỚI THÊM: LOGIC ĐĂNG NHẬP GUEST ---
+  const router = useRouter();
+  const { createClient } = require("@/utils/supabase/client"); // Dùng require để tránh xung đột import nếu cần
+  const supabase = createClient();
+
+  const handleGuestLogin = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (error) {
+        console.error("Lỗi đăng nhập khách:", error.message);
+        return;
+      }
+      if (data?.user) {
+        router.push("/public"); // Chuyển vào trang gia phả sau khi login thành công
+      }
+    } catch (err) {
+      console.error("Lỗi hệ thống:", err);
+    }
+  };
+  // ------------------------------------------  
+  
+  
   return (
     <>
       <motion.div
@@ -47,7 +69,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
           <motion.div whileHover={{ scale: 1.05 }} className="mb-8">
             <img
               src="/assets/images/banner.jpg"
-              alt="GIA PHẢ HỌ NGUYỄN BỈM SƠN"
+              alt="GIA PHẢ HỌ VŨ BÁ TỘC - THÁI BÌNH"
               className="w-full max-w-4xl h-auto rounded-2xl shadow-2xl border-4 border-amber-200"
             />
           </motion.div>
@@ -56,6 +78,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
             Gìn giữ và lưu truyền những giá trị, cội nguồn và truyền thống tốt
             đẹp của dòng họ cho các thế hệ mai sau. Xem gia phả công khai hoặc
             đăng nhập để quản lý.
+            VŨ VĂN KHỞI - phụng lập năm Bính ngọ, 2026
           </p>
         </motion.div>
 
@@ -75,7 +98,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
               <ArrowRight className="size-5 group-hover:translate-x-1.5 transition-transform" />
             </span>
           </Link>
-
+{/*
           <Link
             href="/public"
             className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 rounded-2xl shadow-xl shadow-amber-200/10 hover:shadow-2xl hover:shadow-amber-300/20 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden relative"
@@ -85,6 +108,23 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
               <Users className="size-5 group-hover:scale-110 transition-transform" />
             </span>
           </Link>
+*/}
+{/* NÚT MỚI: Thực hiện đăng nhập Guest thay vì chỉ chuyển link */}
+          <button
+            onClick={handleGuestLogin}
+            className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 rounded-2xl shadow-xl shadow-amber-200/10 hover:shadow-2xl hover:shadow-amber-300/20 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden relative"
+          >
+            <span className="relative z-10 flex items-center gap-3">
+              Xem gia phả
+              <Users className="size-5 group-hover:scale-110 transition-transform" />
+            </span>
+          </button>
+
+          
+
+
+          
+        
         </motion.div>
 
         <motion.div
