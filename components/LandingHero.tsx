@@ -70,73 +70,72 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
   return (
     <div className="w-full flex justify-center px-4">
       <motion.div
-        className="max-w-4xl w-full flex flex-col items-center -mt-10 sm:-mt-16" // Đẩy toàn bộ khối lên sát đỉnh
+        className="max-w-4xl w-full flex flex-col items-center -mt-12 sm:-mt-20" // 1. Đẩy toàn bộ khối lên cao nhất
         initial="hidden"
         animate="visible"
         variants={staggerContainer}
       >
-        {/* --- PHẦN HÌNH ẢNH --- */}
-        <div className="w-full relative">
+        {/* --- KHỐI HÌNH ẢNH --- */}
+        <div className="w-full space-y-4"> {/* 2. Tạo khoảng cách (gap) giữa Banner và Nen.jpg */}
+          
           {/* Banner chính */}
-          <motion.div variants={fadeIn} className="relative z-0">
+          <motion.div variants={fadeIn}>
             <img
               src="/assets/images/banner.jpg"
               alt="GIA PHẢ HỌ VŨ BÁ TỘC"
-              className="w-full h-auto rounded-t-2xl shadow-lg border-x-4 border-t-4 border-amber-200/50"
+              className="w-full h-auto rounded-2xl shadow-lg border-4 border-amber-200/50"
             />
           </motion.div>
 
           {/* Ảnh nội dung (Nen.jpg) */}
-          <motion.div variants={fadeIn} className="relative z-0 -mt-1"> 
+          <motion.div variants={fadeIn}> 
             <img 
               src="/assets/images/Nen.jpg" 
               alt="Giới thiệu Gia phả"            
               className="
                 w-full 
                 h-auto 
-                rounded-b-2xl 
+                rounded-2xl 
                 shadow-2xl 
                 object-contain
-                opacity-60         /* Đã chỉnh độ mờ 60% */
-                border-x-4 border-b-4 border-amber-200/30
+                opacity-60         /* Độ mờ 60% */
+                border-4 border-amber-200/30
               "
             />
           </motion.div>
-
-          {/* --- CỤM NÚT BẤM (Nằm trong relative của ảnh để kiểm soát vị trí) --- */}
-          <motion.div
-            className="
-              absolute bottom-8 left-0 right-0     /* Đưa nút vào trong khung ảnh */
-              flex flex-col sm:flex-row gap-4 justify-center items-center px-4
-              z-10
-            "
-            variants={fadeIn}
-          >
-            {/* Hiệu ứng nền mờ dưới nút để nổi bật chữ */}
-            <div className="absolute inset-0 bg-white/10 blur-2xl rounded-full -z-10 mx-auto w-2/3 h-20"></div>
-
-            <Link
-              href="/login"
-              className="group inline-flex items-center justify-center gap-2 px-8 py-3.5 text-base font-bold text-white bg-stone-900/90 hover:bg-stone-800 rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
-            >
-              Đăng nhập Admin
-              <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-
-            <button
-              onClick={handleGuestLogin}
-              className="group inline-flex items-center justify-center gap-2 px-8 py-3.5 text-base font-bold text-amber-900 bg-white/90 backdrop-blur-sm border border-amber-200 hover:bg-amber-50 rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
-            >
-              Xem gia phả
-              <Users className="size-4 group-hover:scale-110 transition-transform" />
-            </button>
-          </motion.div>
         </div>
 
-        {/* --- DÒNG CHỮ PHỤNG LẬP (Nằm dưới nút, tách biệt hẳn) --- */}
+        {/* --- CỤM NÚT BẤM (Nằm hoàn toàn DƯỚI ảnh) --- */}
+        <motion.div
+          className="
+            mt-8                     /* 3. Khoảng cách dưới ảnh */
+            flex flex-col sm:flex-row gap-4 
+            justify-center items-center w-full px-4
+            z-20
+          "
+          variants={fadeIn}
+        >
+          <Link
+            href="/login"
+            className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-white bg-stone-900 hover:bg-stone-800 rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
+          >
+            Đăng nhập Admin
+            <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+
+          <button
+            onClick={handleGuestLogin}
+            className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-amber-900 bg-white border border-amber-200 hover:bg-amber-50 rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
+          >
+            Xem gia phả
+            <Users className="size-4 group-hover:scale-110 transition-transform" />
+          </button>
+        </motion.div>
+
+        {/* --- DÒNG CHỮ PHỤNG LẬP --- */}
         <motion.p 
           variants={fadeIn}
-          className="mt-6 text-stone-500 font-medium text-sm sm:text-base italic"
+          className="mt-8 text-stone-500 font-medium text-sm sm:text-base italic pb-10"
         >
           VŨ VĂN KHỞI - phụng lập năm Bính Ngọ, 2026
         </motion.p>
