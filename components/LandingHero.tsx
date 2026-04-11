@@ -88,7 +88,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
               className="w-full max-w-4xl h-auto rounded-2xl shadow-2xl border-4 border-amber-200"
             />
           </motion.div>
-
+{/* --- [BƯỚC 1: XÓA TEXT CŨ] ---
           <p className="text-lg sm:text-xl md:text-2xl text-stone-600 max-w-2xl mx-auto leading-relaxed font-light">
             Gìn giữ và lưu truyền những giá trị, cội nguồn và truyền thống tốt
             đẹp của dòng họ cho các thế hệ mai sau. Xem gia phả công khai hoặc
@@ -96,6 +96,37 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
             <br />
             <strong>VŨ VĂN KHỞI - phụng lập năm Bính ngọ, 2026</strong>
           </p>
+                ------------------------------- */}
+
+          {/* --- [BƯỚC 2: THÊM ẢNH MỚI THAY THẾ] --- */}
+          {/* Đây là hình ảnh giới thiệu mới, nằm dưới banner chính */}
+          <img 
+            src="/assets/images/nen.jpg" // 1. Đường dẫn ảnh mới của bạn
+            alt="Giới thiệu Gia phả họ Vũ Bá"            // 2. Mô tả ảnh (cho SEO/Accessibility)
+            
+            // --- CÁC THÔNG SỐ CHỈNH SỬA (Bạn hãy thay đổi ở đây) ---
+            className="
+              mx-auto               /* Căn giữa ảnh */
+              mt-10                 /* Khoảng cách phía trên (margin-top) */
+              
+              /* 3. CHỈNH SIZE (Độ rộng) */
+              w-full                /* Mặc định trên điện thoại: rộng hết cỡ */
+              max-w-[500px]         /* Độ rộng tối đa (size): Ví dụ 500px */
+              
+              /* 4. CHỈNH ĐỘ MỜ (Opacity) */
+              opacity-100           /* Độ mờ (100 là rõ nét nhất, 0 là trong suốt) */
+              
+              /* 5. TÙY CHỌN KHÁC (Độ bo góc, bóng) */
+              rounded-xl            /* Bo góc ảnh nhẹ */
+              shadow-md             /* Thêm bóng đổ nhẹ */
+              
+              /* Hiệu ứng khi di chuột vào (tùy chọn) */
+              hover:opacity-90 transition-opacity duration-300
+            "
+          />
+
+
+          
         </motion.div>
 
         <motion.div
