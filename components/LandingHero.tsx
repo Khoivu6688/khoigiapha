@@ -5,12 +5,11 @@ import {
   ArrowRight,
   Network,
   ShieldCheck,
-  Sparkles,
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Quan trọng: Để điều hướng trang
-import { createClient } from "@/utils/supabase/client"; // Quan trọng: Để kết nối Database
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
 const fadeIn: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -37,30 +36,41 @@ interface LandingHeroProps {
 }
 
 export default function LandingHero({ siteName }: LandingHeroProps) {
-  // --- PHẦN LOGIC ĐĂNG NHẬP GUEST (KHỞI MỚI THÊM) ---
   const router = useRouter();
   const supabase = createClient();
 
+  // HÀM ĐĂNG NHẬP GUEST THEO APP GỐC (DÙNG EMAIL/PASS TRONG .ENV)
   const handleGuestLogin = async () => {
     try {
-      // Gọi lệnh đăng nhập ẩn danh của Supabase để lấy Session
-      const { data, error } = await supabase.auth.signInAnonymously();
-      
+      // Đọc thông tin từ file .env.local
+      const guestEmail = process.env.NEXT_PUBLIC_GUEST_EMAIL;
+      const guestPass = process.env.NEXT_PUBLIC_GUEST_PASS;
+
+      if (!guestEmail || !guestPass) {
+        console.error("Thiếu thông tin Guest trong file .env.local");
+        alert("Cấu hình hệ thống chưa hoàn tất (Thiếu biến môi trường).");
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: guestEmail,
+        password: guestPass,
+      });
+
       if (error) {
         console.error("Lỗi đăng nhập khách:", error.message);
-        alert("Không thể truy cập: " + error.message);
+        alert("Không thể đăng nhập tài khoản khách. Hãy đảm bảo bạn đã tạo user này trên Supabase Authentication.");
         return;
       }
 
       if (data?.user) {
-        // Nếu có user (guest), chuyển hướng vào trang công khai
-        router.push("/public"); 
+        // Đăng nhập thành công, dẫn vào trang công khai
+        router.push("/public");
       }
     } catch (err) {
       console.error("Lỗi hệ thống:", err);
     }
   };
-  // ------------------------------------------------
 
   return (
     <>
@@ -94,7 +104,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
         >
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-16 bg-amber-500/30 blur-2xl rounded-full z-0 hidden sm:block"></div>
 
-          {/* NÚT ĐĂNG NHẬP ADMIN */}
+          {/* NÚT ĐĂNG NHẬP CHÍNH */}
           <Link
             href="/login"
             className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-white bg-stone-900 border border-stone-800 hover:bg-stone-800 hover:border-stone-700 rounded-2xl shadow-xl shadow-stone-900/10 hover:shadow-2xl hover:shadow-stone-900/20 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden relative"
@@ -105,27 +115,19 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
             </span>
           </Link>
 
-          {/* CODE GỐC DÙNG LINK (ĐÃ COMMENT LẠI):
-          <Link
-            href="/public"
-            className="..."
-          >
-            Xem gia phả
-          </Link>
-          */}
-
-          {/* NÚT XEM GIA PHẢ MỚI (DÙNG GUEST LOGIN) */}
+          {/* NÚT XEM GIA PHẢ (LOGIN GUEST) */}
           <button
             onClick={handleGuestLogin}
             className="group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 rounded-2xl shadow-xl shadow-amber-200/10 hover:shadow-2xl hover:shadow-amber-300/20 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden relative"
           >
             <span className="relative z-10 flex items-center gap-3">
-              Xem gia phả (Khách)
+              Xem gia phả
               <Users className="size-5 group-hover:scale-110 transition-transform" />
             </span>
           </button>
         </motion.div>
 
+        {/* CÁC TÍNH NĂNG BÊN DƯỚI GIỮ NGUYÊN */}
         <motion.div
           className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-left border-t border-stone-200/50 relative"
           variants={staggerContainer}
@@ -144,21 +146,19 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
             {
               icon: <ShieldCheck className="size-6 text-amber-700" />,
               title: "Bảo mật Tối đa",
-              desc: "Dữ liệu riêng tư như số điện thoại, quê quán được phân quyền chặt chẽ, bảo vệ an toàn trên hệ thống đám mây.",
+              desc: "Dữ liệu riêng tư được phân quyền chặt chẽ, bảo vệ an toàn trên hệ thống đám mây.",
             },
           ].map((feature, idx) => (
             <motion.div
               key={idx}
               variants={fadeIn}
               whileHover={{ y: -5 }}
-              className="bg-white/70 backdrop-blur-xl p-8 rounded-3xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:bg-white transition-all duration-500 flex flex-col items-start group relative overflow-hidden"
+              className="bg-white/70 backdrop-blur-xl p-8 rounded-3xl border border-white/80 shadow-sm hover:shadow-md transition-all duration-500 flex flex-col items-start group relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-amber-100/50 to-transparent rounded-bl-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-              <div className="p-3.5 bg-white rounded-2xl mb-6 shadow-sm ring-1 ring-stone-100 group-hover:scale-110 group-hover:shadow-md transition-all duration-300 relative z-10">
+              <div className="p-3.5 bg-white rounded-2xl mb-6 ring-1 ring-stone-100 group-hover:scale-110 transition-all duration-300 relative z-10">
                 {feature.icon}
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-3 font-serif relative z-10 group-hover:text-amber-900 transition-colors">
+              <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-3 font-serif relative z-10">
                 {feature.title}
               </h3>
               <p className="text-stone-600 text-base leading-relaxed relative z-10">
