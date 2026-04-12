@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #F5F2ED;
   --foreground: #171717;
 }
 
@@ -12,17 +12,22 @@
   --font-serif: var(--font-playfair);
 }
 
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-} */
+/* Reset hoàn toàn margin/padding mặc định của browser */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-body {
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  /* KHÔNG dùng min-height: 100vh — gây khoảng trắng */
   background: var(--background);
   color: var(--foreground);
 }
+
 @media screen and (max-width: 768px) {
   input,
   textarea,
