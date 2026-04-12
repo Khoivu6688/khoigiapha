@@ -9,7 +9,7 @@ export default function Footer({
 }: FooterProps) {
   return (
     <footer
-      className={`pt-6 pb-10 text-center text-sm text-stone-500 ${className}`}
+      className={`py-3 text-center text-sm text-stone-500 ${className} backdrop-blur-sm`}
     >
       <div className="max-w-7xl mx-auto px-4">
         {showDisclaimer && (
@@ -17,7 +17,8 @@ export default function Footer({
             Nội dung có thể thiếu sót. Vui lòng đóng góp để gia phả chính xác hơn.
           </p>
         )}
-        <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+        <p className="flex items-center justify-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
+          <span>by</span>
           <a
             href="https://homielab.com"
             target="_blank"
@@ -33,7 +34,7 @@ export default function Footer({
             rel="noopener noreferrer"
             className="font-semibold text-blue-600 hover:text-amber-700 transition-colors"
           >
-            Copyright &copy; 2026&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;VŨ VĂN KHỞI
+            Copyright &copy; 2026 VŨ VĂN KHỞI
           </a>
         </p>
       </div>
