@@ -68,7 +68,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
           - h-9: chiều cao cố định để 2 nút luôn bằng nhau
           - text và icon tự scale theo % card
         */}
-        <div className="absolute bottom-[20%] left-0 right-0 z-20 flex flex-row items-stretch justify-center gap-2 px-6">
+        <div className="absolute bottom-[16%] left-0 right-0 z-20 flex flex-row items-stretch justify-center gap-2 px-6">
 
           {/* Xem gia phả — đỏ mận */}
           <button
