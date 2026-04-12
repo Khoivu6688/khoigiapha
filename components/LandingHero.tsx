@@ -70,74 +70,64 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
   return (
     <div className="w-full flex justify-center px-4">
       <motion.div
-        className="max-w-4xl w-full flex flex-col items-center -mt-12 sm:-mt-20" // 1. Đẩy toàn bộ khối lên cao nhất
+        className="max-w-4xl w-full flex flex-col items-center -mt-8 sm:-mt-12"
         initial="hidden"
         animate="visible"
         variants={staggerContainer}
       >
-        {/* --- KHỐI HÌNH ẢNH --- */}
-        <div className="w-full space-y-4"> {/* 2. Tạo khoảng cách (gap) giữa Banner và Nen.jpg */}
-          
-          {/* Banner chính */}
-          <motion.div variants={fadeIn}>
-            <img
-              src="/assets/images/banner.jpg"
-              alt="GIA PHẢ HỌ VŨ BÁ TỘC"
-              className="w-full h-auto rounded-2xl shadow-lg border-4 border-amber-200/50"
-            />
-          </motion.div>
-
-          {/* Ảnh nội dung (Nen.jpg) */}
+        {/* --- KHỐI HÌNH ẢNH MỚI --- */}
+        <div className="w-full">
           <motion.div variants={fadeIn}> 
             <img 
               src="/assets/images/Nen.jpg" 
-              alt="Giới thiệu Gia phả"            
+              alt="Gia Phả"            
               className="
                 w-full 
                 h-auto 
                 rounded-2xl 
                 shadow-2xl 
                 object-contain
-                opacity-60         /* Độ mờ 60% */
-                border-4 border-amber-200/30
+                border-4 border-amber-200/40
               "
             />
           </motion.div>
         </div>
 
-        {/* --- CỤM NÚT BẤM (Nằm hoàn toàn DƯỚI ảnh) --- */}
+        {/* --- CỤM NÚT BẤM (Đã đổi thứ tự) --- */}
         <motion.div
           className="
-            mt-8                     /* 3. Khoảng cách dưới ảnh */
-            flex flex-col sm:flex-row gap-4 
+            mt-10 
+            flex flex-col sm:flex-row-reverse gap-4 
             justify-center items-center w-full px-4
             z-20
           "
           variants={fadeIn}
         >
+          {/* Nút Đăng nhập quản trị - Đưa xuống dưới/sau */}
           <Link
             href="/login"
-            className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-white bg-stone-900 hover:bg-stone-800 rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
+            className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-xl transition-all duration-300 w-full sm:w-auto order-2 sm:order-2"
           >
-            Đăng nhập Admin
+            Đăng nhập quản trị
             <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
           </Link>
 
+          {/* Nút Xem gia phả - Ưu tiên lên trước/trên */}
           <button
             onClick={handleGuestLogin}
-            className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-amber-900 bg-white border border-amber-200 hover:bg-amber-50 rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
+            className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto order-1 sm:order-1"
           >
+            <Users className="size-5" />
             Xem gia phả
-            <Users className="size-4 group-hover:scale-110 transition-transform" />
           </button>
         </motion.div>
 
-        {/* --- DÒNG CHỮ PHỤNG LẬP --- */}
+        {/* --- DÒNG CHỮ CHÂN TRANG --- */}
         <motion.p 
           variants={fadeIn}
-          className="mt-8 text-stone-500 font-medium text-sm sm:text-base italic pb-10"
+          className="mt-12 text-stone-400 font-medium text-xs sm:text-sm italic pb-10"
         >
-          VŨ VĂN KHỞI - phụng lập năm Bính Ngọ, 2026
+          Hệ thống quản lý gia phả trực tuyến
         </motion.p>
 
       </motion.div>
