@@ -39,12 +39,10 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
       const guestEmail = process.env.NEXT_PUBLIC_GUEST_EMAIL;
       const guestPass = process.env.NEXT_PUBLIC_GUEST_PASS;
       if (!guestEmail || !guestPass) return;
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email: guestEmail,
         password: guestPass,
       });
-
       if (data?.user) router.push("/public");
     } catch (err) {
       console.error(err);
@@ -52,31 +50,33 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
   };
 
   return (
-    // bg-[#F5F2ED] là màu giấy cũ, bạn có thể đổi thành trắng #ffffff nếu ảnh Nen.jpg là nền trắng tinh
-    <div className="w-full min-h-screen bg-[#F5F2ED] flex flex-col items-center p-0">
+    /** * p-0 và m-0 đảm bảo không có khoảng cách bao quanh.
+     * Nếu vẫn hở, hãy kiểm tra file layout.tsx xem có padding ở Navbar không.
+     */
+    <div className="w-full min-h-screen bg-[#F5F2ED] flex flex-col items-center p-0 m-0">
       <motion.div
-        className="relative w-full flex flex-col items-center"
+        className="relative w-full flex flex-col items-center p-0 m-0"
         initial="hidden"
         animate="visible"
         variants={staggerContainer}
       >
-        {/* --- ẢNH NỀN MỞ RỘNG TỐI ĐA, SÁT MÉP TRÊN --- */}
-        <div className="w-full leading-[0] overflow-hidden">
+        {/* --- ẢNH NỀN: SÁT MÉP TRÊN TUYỆT ĐỐI --- */}
+        <div className="w-full block leading-none p-0 m-0 border-none">
           <motion.img
             src="/assets/images/Nen.jpg"
             alt="Gia Phả"
-            className="w-full h-auto object-contain"
+            className="w-full h-auto object-contain block p-0 m-0"
             variants={fadeIn}
           />
         </div>
 
-        {/* --- CỤM NÚT BẤM: KÉO LÊN VỊ TRÍ RỄ CÂY --- */}
-        <div className="relative w-full flex justify-center px-4 -mt-[200px] sm:-mt-[350px] z-20">
+        {/* --- CỤM NÚT BẤM: KÉO LÊN VỊ TRÍ RỄ CÂY (Tăng Margin âm để kéo cao hơn) --- */}
+        <div className="relative w-full flex justify-center px-4 -mt-[150px] sm:-mt-[250px] md:-mt-[350px] lg:-mt-[450px] z-20">
           <motion.div
             className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md sm:max-w-none"
             variants={fadeIn}
           >
-            {/* Nút Xem gia phả - Đứng trước/trên - Màu Đỏ Mận */}
+            {/* Nút Xem gia phả - Đỏ Mận - Ưu tiên trên/trước */}
             <button
               onClick={handleGuestLogin}
               className="group inline-flex items-center justify-center gap-3 px-10 py-4 text-lg font-bold text-white bg-[#800000] hover:bg-[#600000] rounded-xl shadow-2xl transition-all duration-300 hover:scale-105 order-1"
@@ -85,7 +85,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
               Xem gia phả
             </button>
 
-            {/* Nút Đăng nhập quản trị - Đứng sau/dưới */}
+            {/* Nút Đăng nhập quản trị - Sau/Dưới */}
             <Link
               href="/login"
               className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-stone-700 bg-white/90 backdrop-blur-md border border-stone-200 hover:bg-white rounded-xl shadow-xl transition-all duration-300 order-2"
@@ -96,7 +96,6 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
           </motion.div>
         </div>
 
-        {/* Padding dưới để tránh ảnh bị cắt cụt quá sát màn hình */}
         <div className="pb-20"></div>
       </motion.div>
     </div>
