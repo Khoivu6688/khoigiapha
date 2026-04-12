@@ -68,13 +68,13 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
           - h-9: chiều cao cố định để 2 nút luôn bằng nhau
           - text và icon tự scale theo % card
         */}
-        <div className="absolute bottom-[14%] left-0 right-0 z-20 flex flex-row items-stretch justify-center gap-2 px-6">
+        <div className="absolute bottom-[20%] left-0 right-0 z-20 flex flex-row items-stretch justify-center gap-2 px-6">
 
           {/* Xem gia phả — đỏ mận */}
           <button
             onClick={handleGuestLogin}
             className="flex-1 inline-flex items-center justify-center gap-1.5
-                       h-9
+                       h-9 max-w-[140px]
                        text-[11px] font-bold tracking-wide
                        text-white bg-[#6B0F1A] hover:bg-[#550C15] active:bg-[#3D0910]
                        rounded-lg shadow-lg shadow-black/40
@@ -88,7 +88,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
           <Link
             href="/login"
             className="flex-1 inline-flex items-center justify-center gap-1
-                       h-9
+                       h-9 max-w-[140px]
                        text-[11px] font-semibold
                        text-stone-800 bg-white/70 hover:bg-white/90
                        backdrop-blur-md border border-white/50
