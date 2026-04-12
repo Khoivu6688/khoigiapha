@@ -35,7 +35,10 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
         email: guestEmail,
         password: guestPass,
       });
-      if (error) { alert("Không thể đăng nhập tài khoản khách."); return; }
+      if (error) {
+        alert("Không thể đăng nhập tài khoản khách.");
+        return;
+      }
       if (data?.user) router.push("/public");
     } catch (err) {
       console.error("Lỗi hệ thống:", err);
@@ -43,19 +46,9 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
   };
 
   return (
-    /*
-      Wrapper: căn giữa, KHÔNG padding dọc
-      - items-start để card không bị kéo dài theo chiều cao
-    */
     <div className="w-full flex justify-center items-start">
 
-      {/*
-        CARD wrapper:
-        - max-w-sm trên mobile, max-w-md trên tablet
-        - rounded-3xl + shadow tạo style "thẻ đứng" như ảnh 3
-        - overflow-hidden để nút absolute không tràn ra ngoài bo góc
-        - relative để đặt nút bên trong
-      */}
+      {/* CARD portrait */}
       <motion.div
         className="
           relative
@@ -67,71 +60,59 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
         animate="visible"
         variants={fadeIn}
       >
-        {/* ẢNH NEN.JPG: lấp đầy card, không bo góc riêng */}
+
+        {/* ẢNH NỀN */}
         <img
           src="/assets/images/Nen.jpg"
           alt="Gia Phả Vũ Bá Tộc - Thái Bình"
           className="w-full h-auto block"
         />
 
-        {/*
-          NÚT BẤM OVERLAY:
-          - absolute bottom-[20%]: vùng rễ cây đa
-          - Tính theo % nên tự scale theo kích thước card/ảnh
-          - flex-col trên mobile → tự thu nhỏ
-          - flex-row trên sm+
-        */}
+        {/* NÚT OVERLAY — bottom-[14%] = vùng rễ cây sát đất */}
         <div
           className="
-            absolute bottom-[20%] left-0 right-0 z-20
-            flex flex-col sm:flex-row
-            items-center justify-center
-            gap-2 sm:gap-3
-            px-5 sm:px-6
+            absolute bottom-[14%] left-0 right-0 z-20
+            flex flex-row items-center justify-center
+            gap-2 px-4
           "
         >
-          {/* NÚT CHÍNH: Xem gia phả — đỏ mận, bên trái */}
+          {/* Xem gia phả — đỏ mận, bên trái */}
           <button
             onClick={handleGuestLogin}
             className="
-              inline-flex items-center justify-center gap-2
-              w-full sm:w-auto
-              px-4 py-2 sm:px-6 sm:py-3
-              text-xs sm:text-sm
+              inline-flex items-center justify-center gap-1.5
+              px-3.5 py-1.5 sm:px-5 sm:py-2
+              text-[11px] sm:text-xs
               font-bold tracking-wide
               text-white
               bg-[#6B0F1A] hover:bg-[#550C15] active:bg-[#3D0910]
-              rounded-xl
-              shadow-lg shadow-black/40
-              transition-all duration-200
-              active:scale-95
+              rounded-lg shadow-lg shadow-black/40
+              transition-all duration-200 active:scale-95
+              whitespace-nowrap
             "
           >
-            <Users className="size-3.5 sm:size-4 flex-shrink-0" />
+            <Users className="size-3 sm:size-3.5 flex-shrink-0" />
             <span>Xem gia phả</span>
           </button>
 
-          {/* NÚT PHỤ: Đăng nhập quản trị — kính mờ */}
+          {/* Đăng nhập — kính mờ, bên phải */}
           <Link
             href="/login"
             className="
-              inline-flex items-center justify-center gap-1.5
-              w-full sm:w-auto
-              px-4 py-2 sm:px-5 sm:py-3
-              text-xs sm:text-sm
+              inline-flex items-center justify-center gap-1
+              px-3.5 py-1.5 sm:px-5 sm:py-2
+              text-[11px] sm:text-xs
               font-semibold
               text-stone-800
               bg-white/70 hover:bg-white/90
-              backdrop-blur-md
-              border border-white/50
-              rounded-xl
-              shadow-md
-              transition-all duration-200
-              active:scale-95
+              backdrop-blur-md border border-white/50
+              rounded-lg shadow-md
+              transition-all duration-200 active:scale-95
+              whitespace-nowrap
             "
           >
-            <span>Đăng nhập quản trị</span>
-            <ArrowRight className="size-3.5 flex-shrink-0" />
+            <span>Đăng nhập</span>
+            <ArrowRight className="size-3 flex-shrink-0" />
           </Link>
         </div>
 
