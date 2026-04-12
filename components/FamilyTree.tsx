@@ -555,7 +555,7 @@ export default function FamilyTree({
           float: left; text-align: center;
           list-style-type: none;
           position: relative;
-          padding: 30px 5px 0 5px;
+          padding: 30px 2px 0 2px;
         }
 
         /* Connecting lines */
