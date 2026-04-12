@@ -60,7 +60,7 @@ export default function FamilyNodeCard({
         }
       }}
       title={onClickSetRoot ? "Click để đặt làm gốc" : undefined}
-      className={`group py-2 px-1 w-24 sm:w-28 md:w-32 flex flex-col items-center justify-start transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative bg-white/70 rounded-2xl
+      className={`group py-2 px-1 w-22 sm:w-26 md:w-30 flex flex-col items-center justify-start transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative bg-white/70 rounded-2xl
         ${isDeceased ? "grayscale-[0.4] opacity-80" : ""}
       `}
     >
