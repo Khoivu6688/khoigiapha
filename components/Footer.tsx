@@ -18,7 +18,7 @@ export default function Footer({
           </p>
         )}
         <p className="flex items-center justify-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
-          <span>by</span>
+          <span> </span>
           <a
             href="https://homielab.com"
             target="_blank"
