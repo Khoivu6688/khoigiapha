@@ -26,7 +26,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
   const handleGuestLogin = async () => {
     try {
       const guestEmail = process.env.NEXT_PUBLIC_GUEST_EMAIL;
-      const guestPass  = process.env.NEXT_PUBLIC_GUEST_PASS;
+      const guestPass = process.env.NEXT_PUBLIC_GUEST_PASS;
       if (!guestEmail || !guestPass) {
         alert("Cấu hình hệ thống chưa hoàn tất.");
         return;
@@ -47,20 +47,12 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
 
   return (
     <div className="w-full flex justify-center items-start">
-
-      {/* CARD portrait */}
       <motion.div
-        className="
-          relative
-          w-full max-w-[360px] sm:max-w-[420px] md:max-w-[480px]
-          rounded-3xl overflow-hidden
-          shadow-2xl shadow-stone-400/30
-        "
+        className="relative w-full max-w-[360px] sm:max-w-[420px] md:max-w-[480px] rounded-3xl overflow-hidden shadow-2xl shadow-stone-400/30"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
       >
-
         {/* ẢNH NỀN */}
         <img
           src="/assets/images/Nen.jpg"
@@ -68,54 +60,28 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
           className="w-full h-auto block"
         />
 
-        {/* NÚT OVERLAY — bottom-[14%] = vùng rễ cây sát đất */}
-        <div
-          className="
-            absolute bottom-[14%] left-0 right-0 z-20
-            flex flex-row items-center justify-center
-            gap-2 px-4
-          "
-        >
-          {/* Xem gia phả — đỏ mận, bên trái */}
+        {/* NÚT OVERLAY — items-stretch để 2 nút cùng chiều cao */}
+        <div className="absolute bottom-[14%] left-0 right-0 z-20 flex flex-row items-stretch justify-center gap-2 px-6">
+
+          {/* Xem gia phả — đỏ mận */}
           <button
             onClick={handleGuestLogin}
-            className="
-              inline-flex items-center justify-center gap-1.5
-              px-3.5 py-1.5 sm:px-5 sm:py-2
-              text-[11px] sm:text-xs
-              font-bold tracking-wide
-              text-white
-              bg-[#6B0F1A] hover:bg-[#550C15] active:bg-[#3D0910]
-              rounded-lg shadow-lg shadow-black/40
-              transition-all duration-200 active:scale-95
-              whitespace-nowrap
-            "
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-0 h-9 sm:h-10 text-[11px] sm:text-xs font-bold tracking-wide text-white bg-[#6B0F1A] hover:bg-[#550C15] active:bg-[#3D0910] rounded-lg shadow-lg shadow-black/40 transition-all duration-200 active:scale-95 whitespace-nowrap"
           >
             <Users className="size-3 sm:size-3.5 flex-shrink-0" />
             <span>Xem gia phả</span>
           </button>
 
-          {/* Đăng nhập — kính mờ, bên phải */}
+          {/* Đăng nhập — kính mờ */}
           <Link
             href="/login"
-            className="
-              inline-flex items-center justify-center gap-1
-              px-3.5 py-1.5 sm:px-5 sm:py-2
-              text-[11px] sm:text-xs
-              font-semibold
-              text-stone-800
-              bg-white/70 hover:bg-white/90
-              backdrop-blur-md border border-white/50
-              rounded-lg shadow-md
-              transition-all duration-200 active:scale-95
-              whitespace-nowrap
-            "
+            className="inline-flex items-center justify-center gap-1 px-4 py-0 h-9 sm:h-10 text-[11px] sm:text-xs font-semibold text-stone-800 bg-white/70 hover:bg-white/90 backdrop-blur-md border border-white/50 rounded-lg shadow-md transition-all duration-200 active:scale-95 whitespace-nowrap"
           >
             <span>Đăng nhập</span>
             <ArrowRight className="size-3 flex-shrink-0" />
           </Link>
-        </div>
 
+        </div>
       </motion.div>
     </div>
   );
