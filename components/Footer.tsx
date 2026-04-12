@@ -46,8 +46,8 @@ export default function Footer({
           >
             Gia Phả VŨ BÁ TỘC - THÁI BÌNH
           </a>
-          <span className="text-stone-500">|</span>
-          
+      <span className="text-stone-500">{'|'}</span>   
+                
             href="https://www.facebook.com/khoivu68"
             target="_blank"
             rel="noopener noreferrer"
