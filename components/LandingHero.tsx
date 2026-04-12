@@ -1,5 +1,4 @@
 "use client";
-
 import { motion } from "framer-motion";
 import { ArrowRight, Users } from "lucide-react";
 import Link from "next/link";
@@ -20,60 +19,54 @@ export default function LandingHero() {
 
   return (
     <div className="w-full min-h-screen bg-[#F5F2ED] flex flex-col p-0 m-0 overflow-x-hidden">
-      {/* CONTAINER CHÍNH: 
-         Dùng relative để làm mốc cho cụm nút absolute 
-      */}
-      <div className="relative w-full flex flex-col items-center">
-        
-        {/* 1. ẢNH NỀN: Sát mép trên, không hở lề */}
-        <div className="w-full leading-none">
-          <img
-            src="/assets/images/Nen.jpg"
-            alt="Gia Phả"
-            // max-h-[85vh] để ảnh không bị phóng quá to trên màn hình máy tính
-            className="w-full h-auto max-h-[85vh] object-contain block mx-auto"
-          />
-        </div>
-
-        {/* 2. CỤM NÚT BẤM: Đã tối ưu cho Mobile */}
-        <div className="absolute bottom-[12%] sm:bottom-[15%] left-0 right-0 flex justify-center px-6 z-20">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full max-w-[320px] sm:max-w-none justify-center"
-          >
-            {/* Nút Xem gia phả: Chữ nhỏ hơn trên mobile, to hơn trên PC */}
-            <button
-              onClick={handleGuestLogin}
-              className="group inline-flex items-center justify-center gap-2 
-                         px-6 py-3 sm:px-10 sm:py-4 
-                         text-sm sm:text-lg font-bold 
-                         text-white bg-[#800000] hover:bg-[#600000] 
-                         rounded-xl shadow-2xl transition-all order-1"
-            >
-              <Users className="size-5 sm:size-6" />
-              <span>Xem gia phả</span>
-            </button>
-
-            {/* Nút Quản trị: Thiết kế thanh thoát hơn */}
-            <Link
-              href="/login"
-              className="group inline-flex items-center justify-center gap-2 
-                         px-5 py-2.5 sm:px-8 sm:py-4 
-                         text-xs sm:text-base font-semibold 
-                         text-stone-600 bg-white/90 backdrop-blur-md 
-                         border border-stone-200 rounded-xl shadow-lg order-2"
-            >
-              Đăng nhập quản trị
-              <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </motion.div>
-        </div>
-
+      
+      {/* ẢNH NỀN: object-cover thay vì object-contain → không hở lề trên/dưới */}
+      <div className="w-full relative">
+        <img
+          src="/assets/images/Nen.jpg"
+          alt="Gia Phả"
+          className="w-full h-[60vh] sm:h-[75vh] object-cover object-top block"
+        />
       </div>
 
-      {/* 3. PHẦN ĐỆM DƯỚI: Chặn tuyệt đối việc Footer đè lên ảnh */}
-      <div className="w-full h-24 sm:h-32 bg-[#F5F2ED]" />
+      {/* CỤM NÚT BẤM: In-flow (không dùng absolute) → co giãn theo màn hình */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="w-full flex flex-col sm:flex-row items-center justify-center
+                   gap-3 sm:gap-4 px-4 py-6 sm:py-8"
+      >
+        {/* Nút Xem gia phả */}
+        <button
+          onClick={handleGuestLogin}
+          className="group inline-flex items-center justify-center gap-2
+                     w-full sm:w-auto
+                     px-6 py-3 sm:px-10 sm:py-4
+                     text-sm sm:text-lg font-bold
+                     text-white bg-[#800000] hover:bg-[#600000]
+                     rounded-xl shadow-lg transition-all"
+        >
+          <Users className="size-4 sm:size-6 flex-shrink-0" />
+          <span>Xem gia phả</span>
+        </button>
+
+        {/* Nút Đăng nhập quản trị */}
+        <Link
+          href="/login"
+          className="group inline-flex items-center justify-center gap-2
+                     w-full sm:w-auto
+                     px-5 py-3 sm:px-8 sm:py-4
+                     text-sm sm:text-base font-semibold
+                     text-stone-600 bg-white/90 backdrop-blur-md
+                     border border-stone-200 rounded-xl shadow transition-all
+                     hover:bg-white"
+        >
+          Đăng nhập quản trị
+          <ArrowRight className="size-4 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+        </Link>
+      </motion.div>
+
     </div>
   );
 }
