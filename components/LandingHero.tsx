@@ -1,102 +1,57 @@
 "use client";
-
-import { motion, Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight, Users } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
 
-const fadeIn: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] },
-  },
-};
-
-const staggerContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-interface LandingHeroProps {
-  siteName: string;
-}
-
-export default function LandingHero({ siteName }: LandingHeroProps) {
-  const router = useRouter();
-  const supabase = createClient();
-
-  const handleGuestLogin = async () => {
-    try {
-      const guestEmail = process.env.NEXT_PUBLIC_GUEST_EMAIL;
-      const guestPass = process.env.NEXT_PUBLIC_GUEST_PASS;
-      if (!guestEmail || !guestPass) return;
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: guestEmail,
-        password: guestPass,
-      });
-      if (data?.user) router.push("/public");
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
+export default function LandingHero() {
   return (
-    <div className="w-full flex flex-col items-center bg-[#F5F2ED] p-0 m-0 overflow-x-hidden">
-      <motion.div
-        className="relative w-full max-w-[1920px] flex flex-col items-center p-0 m-0"
-        initial="hidden"
-        animate="visible"
-        variants={staggerContainer}
+    <div className="relative w-full min-h-screen bg-[#F5F2ED] overflow-hidden flex flex-col">
+      
+      {/* KHỐI CHỨA ẢNH NỀN */}
+      <div 
+        className="relative w-full h-[60vh] sm:h-[75vh] md:h-[85vh] bg-no-repeat bg-top sm:bg-center bg-contain"
+        style={{ backgroundImage: "url('/assets/images/Nen.jpg')" }}
       >
-        {/* --- KHỐI ẢNH CHÍNH: SÁT MÉP TRÊN --- */}
-        <div className="w-full relative leading-none">
-          <motion.img
-            src="/assets/images/Nen.jpg"
-            alt="Gia Phả"
-            className="w-full h-auto block"
-            variants={fadeIn}
-          />
+        {/* Lớp phủ Gradient giúp ảnh tan vào nền phía trên và dưới (Xử lý lỗi hở mép) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#F5F2ED] via-transparent to-[#F5F2ED] opacity-40" />
 
-          {/* --- CỤM NÚT BẤM: ĐẶT TRỰC TIẾP LÊN ẢNH (Vị trí rễ cây) --- */}
-          {/* bottom-[15%] sẽ đẩy cụm nút lên trên khoảng 15% chiều cao ảnh từ dưới lên */}
-          <div className="absolute bottom-[10%] sm:bottom-[15%] left-0 right-0 flex justify-center px-4 z-20">
-            <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full"
-              variants={fadeIn}
+        {/* CỤM NÚT BẤM: Căn chỉnh cực kỳ linh hoạt */}
+        <div className="absolute inset-x-0 bottom-0 flex flex-col items-center translate-y-1/2 px-4 z-20">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full max-w-[90%] sm:max-w-max"
+          >
+            {/* Nút Xem gia phả: Co giãn theo màn hình */}
+            <button
+              className="group flex items-center justify-center gap-2 
+                         px-6 py-3 sm:px-10 sm:py-4 
+                         text-[15px] sm:text-lg font-bold 
+                         text-white bg-[#800000] active:scale-95
+                         rounded-xl shadow-2xl transition-all order-1"
             >
-              {/* Nút Xem gia phả - Đỏ Mận - Đứng trước/trên */}
-              <button
-                onClick={handleGuestLogin}
-                className="group inline-flex items-center justify-center gap-3 px-10 py-4 text-lg font-bold text-white bg-[#800000] hover:bg-[#600000] rounded-xl shadow-2xl transition-all duration-300 hover:scale-105 order-1 w-full sm:w-auto"
-              >
-                <Users className="size-6" />
-                Xem gia phả
-              </button>
+              <Users className="size-5 sm:size-6" />
+              <span>Xem gia phả</span>
+            </button>
 
-              {/* Nút Đăng nhập quản trị - Đứng sau/dưới */}
-              <Link
-                href="/login"
-                className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-stone-700 bg-white/90 backdrop-blur-md border border-stone-200 hover:bg-white rounded-xl shadow-xl transition-all duration-300 order-2 w-full sm:w-auto"
-              >
-                Đăng nhập quản trị
-                <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </motion.div>
-          </div>
+            {/* Nút Quản trị: Nhỏ gọn hơn trên Mobile */}
+            <Link
+              href="/login"
+              className="flex items-center justify-center gap-2 
+                         px-6 py-3 sm:px-8 sm:py-4 
+                         text-[13px] sm:text-base font-semibold 
+                         text-stone-600 bg-white/90 backdrop-blur-sm
+                         border border-stone-200 rounded-xl shadow-lg order-2"
+            >
+              Đăng nhập quản trị
+              <ArrowRight className="size-4" />
+            </Link>
+          </motion.div>
         </div>
+      </div>
 
-        {/* Khoảng đệm nhỏ dưới cùng để Footer không dính sát ảnh */}
-        <div className="h-10 w-full bg-[#F5F2ED]"></div>
-      </motion.div>
+      {/* Khoảng trống bên dưới để giao diện thở, không bị Footer đè */}
+      <div className="flex-grow min-h-[150px]" />
     </div>
   );
 }
