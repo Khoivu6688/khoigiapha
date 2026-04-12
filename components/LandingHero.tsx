@@ -43,8 +43,6 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
       const guestPass = process.env.NEXT_PUBLIC_GUEST_PASS;
 
       if (!guestEmail || !guestPass) {
-        console.error("Thiếu thông tin Guest trong .env.local");
-        alert("Cấu hình hệ thống chưa hoàn tất.");
         return;
       }
 
@@ -53,29 +51,60 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
         password: guestPass,
       });
 
-      if (error) {
-        console.error("Lỗi đăng nhập:", error.message);
-        alert("Không thể đăng nhập tài khoản khách.");
-        return;
-      }
-
       if (data?.user) {
         router.push("/public");
       }
     } catch (err) {
-      console.error("Lỗi hệ thống:", err);
+      console.error(err);
     }
   };
 
   return (
-    <div className="w-full flex justify-center px-4">
+    // Đổi bg sang màu giấy cổ để hòa hợp với ảnh Nen.jpg
+    <div className="w-full min-h-screen flex justify-center px-4 bg-[#F5F2ED]">
       <motion.div
-        className="max-w-4xl w-full flex flex-col items-center -mt-8 sm:-mt-12"
+        className="max-w-4xl w-full flex flex-col items-center pt-10 sm:pt-16"
         initial="hidden"
         animate="visible"
         variants={staggerContainer}
       >
-        {/* --- KHỐI HÌNH ẢNH MỚI --- */}
+        {/* --- TIÊU ĐỀ --- */}
+        <motion.h2 
+          variants={fadeIn}
+          className="text-stone-800 text-2xl sm:text-3xl font-bold mb-8 uppercase tracking-widest"
+        >
+          Lưu Giữ Cội Nguồn
+        </motion.h2>
+
+        {/* --- CỤM NÚT BẤM (Đưa lên trên ảnh) --- */}
+        <motion.div
+          className="
+            mb-10 
+            flex flex-col sm:flex-row gap-4 
+            justify-center items-center w-full px-4
+          "
+          variants={fadeIn}
+        >
+          {/* Nút Xem gia phả - Màu Đỏ Mận (Maroon) */}
+          <button
+            onClick={handleGuestLogin}
+            className="group inline-flex items-center justify-center gap-2 px-10 py-4 text-base font-bold text-white bg-[#800000] hover:bg-[#600000] rounded-full transition-all duration-300 w-full sm:w-auto order-1"
+          >
+            <Users className="size-5" />
+            Xem gia phả
+          </button>
+
+          {/* Nút Đăng nhập quản trị - Tông màu trầm hòa hợp nền */}
+          <Link
+            href="/login"
+            className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-stone-600 border border-stone-300 hover:bg-stone-200/50 rounded-full transition-all duration-300 w-full sm:w-auto order-2"
+          >
+            Đăng nhập quản trị
+            <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </motion.div>
+
+        {/* --- ẢNH NỀN (Bỏ viền, bỏ bóng mờ) --- */}
         <div className="w-full">
           <motion.div variants={fadeIn}> 
             <img 
@@ -84,50 +113,19 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
               className="
                 w-full 
                 h-auto 
-                rounded-2xl 
-                shadow-2xl 
                 object-contain
-                border-4 border-amber-200/40
+                /* Đã loại bỏ shadow, border và opacity để hòa vào nền */
               "
             />
           </motion.div>
         </div>
 
-        {/* --- CỤM NÚT BẤM (Đã đổi thứ tự) --- */}
-        <motion.div
-          className="
-            mt-10 
-            flex flex-col sm:flex-row-reverse gap-4 
-            justify-center items-center w-full px-4
-            z-20
-          "
-          variants={fadeIn}
-        >
-          {/* Nút Đăng nhập quản trị - Đưa xuống dưới/sau */}
-          <Link
-            href="/login"
-            className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-xl transition-all duration-300 w-full sm:w-auto order-2 sm:order-2"
-          >
-            Đăng nhập quản trị
-            <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-
-          {/* Nút Xem gia phả - Ưu tiên lên trước/trên */}
-          <button
-            onClick={handleGuestLogin}
-            className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto order-1 sm:order-1"
-          >
-            <Users className="size-5" />
-            Xem gia phả
-          </button>
-        </motion.div>
-
-        {/* --- DÒNG CHỮ CHÂN TRANG --- */}
+        {/* --- CHÂN TRANG --- */}
         <motion.p 
           variants={fadeIn}
-          className="mt-12 text-stone-400 font-medium text-xs sm:text-sm italic pb-10"
+          className="mt-12 text-stone-400 font-medium text-xs italic pb-10"
         >
-          Hệ thống quản lý gia phả trực tuyến
+          Hệ thống quản lý gia phả trực tuyến © 2026
         </motion.p>
 
       </motion.div>
