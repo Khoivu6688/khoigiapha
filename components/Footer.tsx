@@ -19,7 +19,7 @@ export default function Footer({
         )}
         <p className="flex items-center justify-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
           <span>by</span>
-          
+          <a
             href="https://homielab.com"
             target="_blank"
             rel="noopener noreferrer"
@@ -28,7 +28,7 @@ export default function Footer({
             Gia Phả VŨ BÁ TỘC - THÁI BÌNH
           </a>
           <span className="text-stone-400">|</span>
-          
+          <a
             href="https://www.facebook.com/khoivu68"
             target="_blank"
             rel="noopener noreferrer"
