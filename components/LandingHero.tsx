@@ -60,22 +60,40 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
           className="w-full h-auto block"
         />
 
-        {/* NÚT OVERLAY — items-stretch để 2 nút cùng chiều cao */}
+        {/*
+          NÚT OVERLAY:
+          - px-6 hai bên tạo lề trái phải
+          - gap-2 khoảng cách giữa 2 nút
+          - flex-1 trên mỗi nút → 2 nút chia đôi chiều rộng còn lại
+          - h-9: chiều cao cố định để 2 nút luôn bằng nhau
+          - text và icon tự scale theo % card
+        */}
         <div className="absolute bottom-[14%] left-0 right-0 z-20 flex flex-row items-stretch justify-center gap-2 px-6">
 
           {/* Xem gia phả — đỏ mận */}
           <button
             onClick={handleGuestLogin}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-0 h-9 sm:h-10 text-[11px] sm:text-xs font-bold tracking-wide text-white bg-[#6B0F1A] hover:bg-[#550C15] active:bg-[#3D0910] rounded-lg shadow-lg shadow-black/40 transition-all duration-200 active:scale-95 whitespace-nowrap"
+            className="flex-1 inline-flex items-center justify-center gap-1.5
+                       h-9
+                       text-[11px] font-bold tracking-wide
+                       text-white bg-[#6B0F1A] hover:bg-[#550C15] active:bg-[#3D0910]
+                       rounded-lg shadow-lg shadow-black/40
+                       transition-all duration-200 active:scale-95 whitespace-nowrap"
           >
-            <Users className="size-3 sm:size-3.5 flex-shrink-0" />
+            <Users className="size-3.5 flex-shrink-0" />
             <span>Xem gia phả</span>
           </button>
 
           {/* Đăng nhập — kính mờ */}
           <Link
             href="/login"
-            className="inline-flex items-center justify-center gap-1 px-4 py-0 h-9 sm:h-10 text-[11px] sm:text-xs font-semibold text-stone-800 bg-white/70 hover:bg-white/90 backdrop-blur-md border border-white/50 rounded-lg shadow-md transition-all duration-200 active:scale-95 whitespace-nowrap"
+            className="flex-1 inline-flex items-center justify-center gap-1
+                       h-9
+                       text-[11px] font-semibold
+                       text-stone-800 bg-white/70 hover:bg-white/90
+                       backdrop-blur-md border border-white/50
+                       rounded-lg shadow-md
+                       transition-all duration-200 active:scale-95 whitespace-nowrap"
           >
             <span>Đăng nhập</span>
             <ArrowRight className="size-3 flex-shrink-0" />
