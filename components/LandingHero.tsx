@@ -52,61 +52,52 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
   };
 
   return (
-    // Màu nền tiệp với màu ảnh để tạo cảm giác không viền
-    <div className="w-full min-h-screen bg-[#F5F2ED] flex flex-col items-center">
+    // bg-[#F5F2ED] là màu giấy cũ, bạn có thể đổi thành trắng #ffffff nếu ảnh Nen.jpg là nền trắng tinh
+    <div className="w-full min-h-screen bg-[#F5F2ED] flex flex-col items-center p-0">
       <motion.div
-        className="relative w-full max-w-[1400px] flex flex-col items-center"
+        className="relative w-full flex flex-col items-center"
         initial="hidden"
         animate="visible"
         variants={staggerContainer}
       >
-        {/* --- ẢNH NỀN (Mở rộng tối đa, không viền) --- */}
-        <div className="w-full overflow-hidden">
+        {/* --- ẢNH NỀN MỞ RỘNG TỐI ĐA, SÁT MÉP TRÊN --- */}
+        <div className="w-full leading-[0] overflow-hidden">
           <motion.img
             src="/assets/images/Nen.jpg"
             alt="Gia Phả"
-            className="w-full h-auto object-cover sm:object-contain"
+            className="w-full h-auto object-contain"
             variants={fadeIn}
           />
         </div>
 
-        {/* --- CỤM NỘI DUNG CHÈN LÊN ẢNH --- */}
-        {/* Vị trí này sẽ nằm dưới rễ cây và trên dòng chữ lưu trữ cội nguồn */}
-        <div className="flex flex-col items-center w-full px-4 -mt-20 sm:-mt-32 z-10">
-          
-          {/* Cụm nút bấm: Cân đối, Xem gia phả đứng trước */}
+        {/* --- CỤM NÚT BẤM: KÉO LÊN VỊ TRÍ RỄ CÂY --- */}
+        <div className="relative w-full flex justify-center px-4 -mt-[200px] sm:-mt-[350px] z-20">
           <motion.div
-            className="flex flex-col sm:flex-row gap-4 mb-8 w-full max-w-md sm:max-w-none justify-center"
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md sm:max-w-none"
             variants={fadeIn}
           >
-            {/* Nút Xem gia phả - Màu Đỏ Mận */}
+            {/* Nút Xem gia phả - Đứng trước/trên - Màu Đỏ Mận */}
             <button
               onClick={handleGuestLogin}
-              className="group inline-flex items-center justify-center gap-2 px-10 py-4 text-base font-bold text-white bg-[#800000] hover:bg-[#600000] rounded-xl shadow-lg transition-all duration-300 order-1"
+              className="group inline-flex items-center justify-center gap-3 px-10 py-4 text-lg font-bold text-white bg-[#800000] hover:bg-[#600000] rounded-xl shadow-2xl transition-all duration-300 hover:scale-105 order-1"
             >
-              <Users className="size-5" />
+              <Users className="size-6" />
               Xem gia phả
             </button>
 
-            {/* Nút Đăng nhập quản trị */}
+            {/* Nút Đăng nhập quản trị - Đứng sau/dưới */}
             <Link
               href="/login"
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-stone-700 bg-white/80 backdrop-blur-sm border border-stone-300 hover:bg-white rounded-xl shadow-md transition-all duration-300 order-2"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold text-stone-700 bg-white/90 backdrop-blur-md border border-stone-200 hover:bg-white rounded-xl shadow-xl transition-all duration-300 order-2"
             >
               Đăng nhập quản trị
               <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
-
-          {/* Dòng chữ giữ nguyên vị trí dưới cùng */}
-          <motion.h2
-            variants={fadeIn}
-            className="text-stone-800 text-xl sm:text-2xl font-bold uppercase tracking-[0.3em] text-center pb-10"
-          >
-            Lưu Giữ Cội Nguồn
-          </motion.h2>
         </div>
 
+        {/* Padding dưới để tránh ảnh bị cắt cụt quá sát màn hình */}
+        <div className="pb-20"></div>
       </motion.div>
     </div>
   );
