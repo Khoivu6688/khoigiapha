@@ -87,27 +87,30 @@ header, .header-container {
   width: 100%;
 }
 
-/* Cấu hình riêng cho điện thoại (màn hình nhỏ hơn 768px) */
 @media screen and (max-width: 768px) {
-  /* 1. Thu nhỏ chiều cao tổng thể của Header */
-  header, .header-container {
+  /* Ép thu nhỏ Header */
+  header, 
+  [class*="header"], 
+  [class*="LandingHero"] { 
     height: auto !important;
-    padding: 10px 0 !important;
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+    min-height: unset !important;
   }
 
-  /* 2. Thu nhỏ Logo (ảnh Nen.jpg hoặc Banner gia phả) */
-  header img, .header-logo {
-    max-width: 150px !important; /* Giới hạn lại chiều rộng logo trên mobile */
+  /* Ép thu nhỏ ảnh Logo/Banner */
+  header img, 
+  .export-header img {
+    max-width: 120px !important; /* Giảm hẳn xuống 120px cho mobile */
     height: auto !important;
   }
 
-  /* 3. Thu nhỏ tiêu đề chữ */
-  header h1, .header-title {
-    font-size: 1.25rem !important; /* Khoảng 20px */
-    margin-bottom: 4px !important;
-  }
-
-  header p, .header-subtitle {
-    font-size: 0.8rem !important; /* Khoảng 12px */
+  /* Ép thu nhỏ font chữ tiêu đề */
+  header h1, 
+  .export-title,
+  h1 {
+    font-size: 1.5rem !important; /* Thu nhỏ cỡ chữ tiêu đề */
+    line-height: 1.2 !important;
+    letter-spacing: 1px !important;
   }
 }
