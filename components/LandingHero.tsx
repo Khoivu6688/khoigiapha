@@ -48,7 +48,7 @@ export default function LandingHero({ siteName }: LandingHeroProps) {
   return (
     <div className="w-full flex justify-center items-start">
       <motion.div
-       className="relative w-full max-w-[300px] sm:max-w-[380px] md:max-w-[440px] rounded-2xl overflow-hidden shadow-xl shadow-stone-400/30"
+     className="relative w-[85%] max-w-[260px] sm:max-w-[380px] md:max-w-[440px] mx-auto rounded-2xl overflow-hidden shadow-xl shadow-stone-400/30"
         
         initial="hidden"
         animate="visible"
