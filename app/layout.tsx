@@ -2,22 +2,24 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import config from "./config";
 import "./globals.css";
+import LandingOverlay from "@/components/LandingOverlay"; // 👈 IMPORT ĐÚNG CHỖ
 
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
   variable: "--font-inter",
 });
+
 const playfair = Playfair_Display({
   subsets: ["latin", "vietnamese"],
   variable: "--font-playfair",
 });
+
 export const metadata: Metadata = {
   title: {
     default: "Gia phả họ Vũ Bá - Thái Bình",
     template: "%s | Gia phả họ Vũ Bá - Thái Bình",
   },
-  description:
-    "Gia phả họ Vũ Bá - Thái Bình",
+  description: "Gia phả họ Vũ Bá - Thái Bình",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -33,9 +35,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
@@ -51,17 +53,16 @@ export default function RootLayout({
         <meta name="application-name" content="Gia phả họ Vũ Bá - Thái Bình" />
         <meta name="theme-color" content="#f59e0b" />
       </head>
+
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased relative`}
       >
+        {/* 👇 ĐẶT OVERLAY Ở ĐÂY */}
+        <LandingOverlay />
+
+        {/* 👇 APP CHÍNH */}
         {children}
       </body>
     </html>
   );
 }
-import LandingOverlay from "@/components/LandingOverlay"
-
-<body>
-  <LandingOverlay />
-  {children}
-</body>
