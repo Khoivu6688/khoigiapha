@@ -33,7 +33,7 @@ export default function LandingOverlayHero() {
       {/* ẢNH FULL MÀN */}
       <img
         src="/assets/images/Nen.jpg"
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-contain bg-[#f5efe6]"
         alt=""
       />
 
