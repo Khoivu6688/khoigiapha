@@ -15,7 +15,7 @@ export default function LandingOverlay() {
   const supabase = createClient();
 
   useEffect(() => {
-    // 👉 Khi quay về trang chủ → hiện lại overlay
+    // 👉 Reset khi quay về trang chủ
     if (pathname === "/") {
       localStorage.removeItem("seenLanding");
     }
@@ -60,49 +60,43 @@ export default function LandingOverlay() {
   if (!ready || !show) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#f5efe6]">
+    <div className="fixed inset-0 z-[9999] w-screen h-[100dvh] bg-[#f5efe6]">
 
-      {/* KHUNG ẢNH RESPONSIVE */}
-      <div className="relative w-[92vw] max-w-[420px] aspect-[9/16]">
+      {/* ẢNH CHUẨN - KHÔNG PHÓNG */}
+      <img
+        src="/bg-gia-pha.jpg"
+        alt=""
+        className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+      />
 
-        {/* ẢNH */}
-        <img
-          src="/bg-gia-pha.jpg"
-          alt=""
-          className="w-full h-full object-cover rounded-2xl select-none"
-        />
+      {/* NÚT */}
+      <div className="absolute bottom-[16%] left-0 right-0 z-20 flex justify-center gap-2 px-6">
 
-        {/* NÚT */}
-        <div className="absolute bottom-[14%] left-0 right-0 flex justify-center gap-2 px-6">
+        <button
+          onClick={handleGuestLogin}
+          className="flex-1 max-w-[140px] h-9 flex items-center justify-center gap-1.5
+                     text-[11px] font-bold text-white
+                     bg-[#6B0F1A] hover:bg-[#550C15]
+                     rounded-lg shadow-lg shadow-black/40
+                     transition-all duration-200 active:scale-95"
+        >
+          <Users className="size-3.5" />
+          Xem gia phả
+        </button>
 
-          {/* XEM GIA PHẢ */}
-          <button
-            onClick={handleGuestLogin}
-            className="flex-1 max-w-[140px] h-9 flex items-center justify-center gap-1.5
-                       text-[11px] font-bold text-white
-                       bg-[#6B0F1A] hover:bg-[#550C15]
-                       rounded-lg shadow-lg shadow-black/40
-                       transition-all duration-200 active:scale-95"
-          >
-            <Users className="size-3.5" />
-            Xem gia phả
-          </button>
+        <Link
+          href="/login"
+          onClick={closeOverlay}
+          className="flex-1 max-w-[140px] h-9 flex items-center justify-center gap-1
+                     text-[11px] font-semibold
+                     text-stone-800 bg-white/80 hover:bg-white/90
+                     rounded-lg shadow-md
+                     transition-all duration-200 active:scale-95"
+        >
+          Đăng nhập
+          <ArrowRight className="size-3" />
+        </Link>
 
-          {/* ĐĂNG NHẬP */}
-          <Link
-            href="/login"
-            onClick={closeOverlay}
-            className="flex-1 max-w-[140px] h-9 flex items-center justify-center gap-1
-                       text-[11px] font-semibold
-                       text-stone-800 bg-white/80 hover:bg-white/90
-                       rounded-lg shadow-md
-                       transition-all duration-200 active:scale-95"
-          >
-            Đăng nhập
-            <ArrowRight className="size-3" />
-          </Link>
-
-        </div>
       </div>
     </div>
   );
