@@ -80,3 +80,34 @@ select {
   border-radius: 10px;
   margin: 6px;
 }
+
+/* Điều chỉnh Header linh hoạt */
+header, .header-container {
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+/* Cấu hình riêng cho điện thoại (màn hình nhỏ hơn 768px) */
+@media screen and (max-width: 768px) {
+  /* 1. Thu nhỏ chiều cao tổng thể của Header */
+  header, .header-container {
+    height: auto !important;
+    padding: 10px 0 !important;
+  }
+
+  /* 2. Thu nhỏ Logo (ảnh Nen.jpg hoặc Banner gia phả) */
+  header img, .header-logo {
+    max-width: 150px !important; /* Giới hạn lại chiều rộng logo trên mobile */
+    height: auto !important;
+  }
+
+  /* 3. Thu nhỏ tiêu đề chữ */
+  header h1, .header-title {
+    font-size: 1.25rem !important; /* Khoảng 20px */
+    margin-bottom: 4px !important;
+  }
+
+  header p, .header-subtitle {
+    font-size: 0.8rem !important; /* Khoảng 12px */
+  }
+}
