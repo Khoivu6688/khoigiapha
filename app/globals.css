@@ -114,3 +114,40 @@ header, .header-container {
     letter-spacing: 1px !important;
   }
 }
+/* Khung xuất bản gia phả thanh thoát */
+.export-container {
+  display: inline-block; /* Quan trọng nhất: giúp khung giãn theo độ rộng thực của cây */
+  min-width: 100%;
+  padding: 80px 100px;
+  background-color: #fdfaf1; /* Màu giấy kem nhẹ */
+  box-sizing: border-box;
+}
+
+.export-border-line {
+  /* Viền chỉ mảnh màu nâu đồng, tạo cảm giác tinh tế */
+  border: 1px solid #8b4513; 
+  padding: 50px;
+  position: relative;
+}
+
+/* Họa tiết góc nhỏ để tăng tính trang trọng mà không gây rối mắt */
+.export-border-line::before,
+.export-border-line::after {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #8b4513;
+}
+
+.export-border-line::before { top: -5px; left: -5px; border-right: none; border-bottom: none; }
+.export-border-line::after { bottom: -5px; right: -5px; border-left: none; border-top: none; }
+
+/* Định dạng font chữ theo chuẩn mô phỏng */
+.export-title {
+  font-family: var(--font-playfair), serif;
+  color: #8b4513;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
