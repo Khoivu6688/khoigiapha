@@ -59,3 +59,9 @@ export default function RootLayout({
     </html>
   );
 }
+import LandingOverlay from "@/components/LandingOverlay"
+
+<body>
+  <LandingOverlay />
+  {children}
+</body>
