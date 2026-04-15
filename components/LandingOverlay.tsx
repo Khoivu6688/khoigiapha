@@ -69,35 +69,37 @@ export default function LandingOverlay() {
         className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
       />
 
-      {/* NÚT */}
-      <div className="absolute bottom-[16%] left-0 right-0 z-20 flex justify-center gap-4 px-6">
+     {/* CONTAINER CHỨA NÚT - Điều chỉnh bottom-[16%] để thay đổi cao thấp so với đáy */}
+<div className="absolute bottom-[16%] left-0 right-0 z-20 flex justify-center gap-3 px-6">
 
-        <button
-          onClick={handleGuestLogin}
-          className="flex-1 max-w-[140px] h-10 flex items-center justify-center gap-1.5
-                     text-[11px] font-bold text-white
-                     bg-[#6B0F1A] hover:bg-[#550C15]
-                     rounded-lg shadow-lg shadow-black/40
-                     transition-all duration-200 active:scale-95"
-        >
-          <Users className="size-3.5" />
-          Xem gia phả
-        </button>
+  {/* NÚT XEM GIA PHẢ */}
+  <button
+    onClick={handleGuestLogin}
+    className="flex-1 max-w-[150px] h-10 flex items-center justify-center gap-1.5
+               text-[13px] font-bold text-white
+               bg-[#6B0F1A] hover:bg-[#550C15]
+               rounded-lg shadow-lg shadow-black/40
+               transition-all duration-200 active:scale-95"
+  >
+    <Users className="size-4" /> {/* Tăng nhẹ size icon để hợp với chữ 13px */}
+    Xem gia phả
+  </button>
 
-        <Link
-          href="/login"
-          onClick={closeOverlay}
-          className="flex-1 max-w-[140px] h-10 flex items-center justify-center gap-1.5
-                     text-[11px] font-semibold
-                     text-stone-800 bg-white/80 hover:bg-white/90
-                     rounded-lg shadow-md
-                     transition-all duration-200 active:scale-95"
-        >
-          Đăng nhập
-          <ArrowRight className="size-3" />
-        </Link>
+  {/* NÚT ĐĂNG NHẬP */}
+  <Link
+    href="/login"
+    onClick={closeOverlay}
+    className="flex-1 max-w-[150px] h-10 flex items-center justify-center gap-1.5
+               text-[13px] font-bold
+               text-stone-800 bg-white/80 hover:bg-white/90
+               rounded-lg shadow-md
+               transition-all duration-200 active:scale-95"
+  >
+    Đăng nhập
+    <ArrowRight className="size-4" /> {/* Đồng bộ size icon 4 (16px) */}
+  </Link>
 
-      </div>
+</div>
     </div>
   );
 }
