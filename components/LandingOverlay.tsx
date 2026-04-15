@@ -70,11 +70,11 @@ export default function LandingOverlay() {
       />
 
       {/* NÚT */}
-      <div className="absolute bottom-[16%] left-0 right-0 z-20 flex justify-center gap-2 px-6">
+      <div className="absolute bottom-[16%] left-0 right-0 z-20 flex justify-center gap-4 px-6">
 
         <button
           onClick={handleGuestLogin}
-          className="flex-1 max-w-[140px] h-9 flex items-center justify-center gap-1.5
+          className="flex-1 max-w-[140px] h-10 flex items-center justify-center gap-1.5
                      text-[11px] font-bold text-white
                      bg-[#6B0F1A] hover:bg-[#550C15]
                      rounded-lg shadow-lg shadow-black/40
@@ -87,7 +87,7 @@ export default function LandingOverlay() {
         <Link
           href="/login"
           onClick={closeOverlay}
-          className="flex-1 max-w-[140px] h-9 flex items-center justify-center gap-1
+          className="flex-1 max-w-[140px] h-10 flex items-center justify-center gap-1.5
                      text-[11px] font-semibold
                      text-stone-800 bg-white/80 hover:bg-white/90
                      rounded-lg shadow-md
