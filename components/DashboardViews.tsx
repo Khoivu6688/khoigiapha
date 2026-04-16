@@ -6,7 +6,6 @@ import DashboardMembersBranchGenerationList from "@/components/DashboardMembersB
 import FamilyTree from "@/components/FamilyTree";
 import MindmapTree from "@/components/MindmapTree";
 import RootSelector from "@/components/RootSelector";
-// BỎ: BranchesTable và NotablesList vì không còn dùng trong menu
 import Introduction from "@/components/Introduction";
 import { Person, Relationship } from "@/types";
 import { useMemo } from "react";
@@ -26,6 +25,7 @@ export default function DashboardViews({
 }: DashboardViewsProps) {
   const { view: currentView, rootId } = useDashboard();
 
+  // Logic tính toán cây gia phả và gốc (Root)
   const { personsMap, roots, defaultRootId } = useMemo(() => {
     const pMap = new Map<string, Person>();
     persons.forEach((p) => pMap.set(p.id, p));
@@ -65,14 +65,17 @@ export default function DashboardViews({
 
   return (
     <>
-      {/* SỬA LỖI MOBILE: min-w-0 để ngăn khung bị đẩy rộng hơn màn hình */}
-      <main className="flex-1 bg-stone-50/50 flex flex-col w-full min-w-0">
+      {/* - min-w-0: Ngăn chặn lỗi flexbox đẩy chiều rộng main vượt quá màn hình mobile.
+          - bg-stone-50/50: Tạo nền nhẹ nhàng cho Dashboard.
+      */}
+      <main className="flex-1 bg-stone-50/50 flex flex-col w-full min-w-0 overflow-hidden">
         
+        {/* KHỐI ĐIỀU KHIỂN CÂY (Chỉ hiện khi xem Sơ đồ/Mindmap) */}
         {(currentView === "tree" || currentView === "mindmap") &&
           persons.length > 0 &&
           activeRootId && (
-            <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-6 pb-2 w-full flex flex-col sm:flex-row flex-wrap items-center sm:justify-between gap-4 relative z-20">
-              <div className="flex items-center gap-3 sm:gap-4 flex-wrap w-full sm:w-auto justify-center sm:justify-start">
+            <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-4 pb-2 w-full flex flex-col sm:flex-row flex-wrap items-center sm:justify-between gap-2 relative z-20">
+              <div className="flex items-center gap-2 sm:gap-4 flex-wrap w-full sm:w-auto justify-center sm:justify-start">
                 <RootSelector persons={persons} currentRootId={activeRootId} />
                 <div id="tree-depth-portal" />
               </div>
@@ -83,8 +86,9 @@ export default function DashboardViews({
             </div>
           )}
 
+        {/* VIEW: DANH SÁCH THÀNH VIÊN */}
         {currentView === "list" && (
-          <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8 w-full relative z-10 overflow-x-hidden">
+          <div className="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8 py-2 sm:py-6 w-full relative z-10 overflow-x-hidden">
             <DashboardMemberList
               initialPersons={persons}
               canEdit={canEdit}
@@ -93,22 +97,21 @@ export default function DashboardViews({
           </div>
         )}
 
+        {/* VIEW: LỌC THEO CHI/ĐỜI */}
         {currentView === "members_filter" && (
-          <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8 w-full relative z-10">
+          <div className="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8 py-2 sm:py-6 w-full relative z-10">
             <DashboardMembersBranchGenerationList persons={persons} />
           </div>
         )}
 
-        {/* ĐÃ XÓA: Mục Branches (Các chi) hoàn toàn khỏi logic render */}
-
+        {/* VIEW: GIỚI THIỆU DÒNG HỌ */}
         {currentView === "introduction" && (
-          <div className="relative">
+          <div className="relative pt-2 sm:pt-4">
             <Introduction />
           </div>
         )}
 
-        {/* ĐÃ XÓA: Mục Notables (Danh nhân) hoàn toàn khỏi logic render */}
-
+        {/* VIEW: SƠ ĐỒ GIA PHẢ & MINDMAP (Chiếm toàn bộ diện tích còn lại) */}
         <div className="flex-1 w-full relative z-10 overflow-hidden">
           {currentView === "tree" && (
             <FamilyTree
