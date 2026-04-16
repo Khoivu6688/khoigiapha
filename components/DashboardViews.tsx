@@ -1,23 +1,5 @@
 "use client";
-
-import { useDashboard } from "@/components/DashboardContext";
-import DashboardMemberList from "@/components/DashboardMemberList";
-import DashboardMembersBranchGenerationList from "@/components/DashboardMembersBranchGenerationList";
-import FamilyTree from "@/components/FamilyTree";
-import MindmapTree from "@/components/MindmapTree";
-import RootSelector from "@/components/RootSelector";
-import BranchesTable from "@/components/BranchesTable";
-import Introduction from "@/components/Introduction";
-import NotablesList from "@/components/NotablesList";
-import { Person, Relationship } from "@/types";
-import { useMemo } from "react";
-
-interface DashboardViewsProps {
-  persons: Person[];
-  relationships: Relationship[];
-  branches: any[];
-  canEdit?: boolean;
-}
+// ... (giữ nguyên các import)
 
 export default function DashboardViews({
   persons,
@@ -26,66 +8,38 @@ export default function DashboardViews({
   canEdit = false,
 }: DashboardViewsProps) {
   const { view: currentView, rootId } = useDashboard();
-
-  // Prepare map and roots for tree views
-  const { personsMap, roots, defaultRootId } = useMemo(() => {
-    const pMap = new Map<string, Person>();
-    persons.forEach((p) => pMap.set(p.id, p));
-
-    const childIds = new Set(
-      relationships
-        .filter(
-          (r) => r.type === "biological_child" || r.type === "adopted_child",
-        )
-        .map((r) => r.person_b),
-    );
-
-    let finalRootId = rootId;
-
-    // If no rootId is provided, fallback to the earliest created person
-    if (!finalRootId || !pMap.has(finalRootId)) {
-      const rootsFallback = persons.filter((p) => !childIds.has(p.id));
-      if (rootsFallback.length > 0) {
-        finalRootId = rootsFallback[0].id;
-      } else if (persons.length > 0) {
-        finalRootId = persons[0].id; // ultimate fallback
-      }
-    }
-
-    let calculatedRoots: Person[] = [];
-    if (finalRootId && pMap.has(finalRootId)) {
-      calculatedRoots = [pMap.get(finalRootId)!];
-    }
-
-    return {
-      personsMap: pMap,
-      roots: calculatedRoots,
-      defaultRootId: finalRootId,
-    };
-  }, [persons, relationships, rootId]);
+  // ... (giữ nguyên logic useMemo)
 
   const activeRootId = rootId || defaultRootId;
 
   return (
     <>
-      <main className="flex-1 bg-stone-50/50 flex flex-col">
+      {/* 1. Thêm overflow-x-hidden để chặn việc rung lắc màn hình ngang */}
+      <main className="flex-1 bg-stone-50/50 flex flex-col w-full overflow-x-hidden">
+        
+        {/* VIEW: TREE & MINDMAP */}
         {(currentView === "tree" || currentView === "mindmap") &&
           persons.length > 0 &&
           activeRootId && (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 w-full flex flex-col sm:flex-row flex-wrap items-center sm:justify-between gap-4 relative z-20">
-              <div className="flex items-center gap-3 sm:gap-4 flex-wrap w-full sm:w-auto justify-center sm:justify-start">
+            // Sửa px-4 thành px-2 trên mobile để lấy thêm diện tích
+            <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-4 pb-2 w-full flex flex-col sm:flex-row flex-wrap items-center sm:justify-between gap-4 relative z-20">
+              <div className="flex items-center gap-2 sm:gap-4 flex-wrap w-full sm:w-auto justify-center sm:justify-start">
                 <RootSelector persons={persons} currentRootId={activeRootId} />
-                <div id="tree-depth-portal" />
+                <div id="tree-depth-portal" className="flex-shrink-0" />
               </div>
               <div
                 id="tree-toolbar-portal"
-                className="flex items-center gap-2 flex-wrap justify-center"
+                className="flex items-center gap-2 flex-wrap justify-center flex-shrink-0"
               />
             </div>
           )}
 
+        {/* VIEW: LIST (Danh sách thành viên) 
+            ĐÂY LÀ NƠI GÂY LỖI BÓP VIEW NHIỀU NHẤT
+        */}
         {currentView === "list" && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full relative z-10">
+          // Thay px-4 bằng px-1 hoặc px-2 trên mobile
+          <div className="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8 py-4 sm:py-8 w-full relative z-10 overflow-x-auto">
             <DashboardMemberList
               initialPersons={persons}
               canEdit={canEdit}
@@ -94,27 +48,36 @@ export default function DashboardViews({
           </div>
         )}
 
+        {/* VIEW: LỌC CHI/ĐỜI */}
         {currentView === "members_filter" && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full relative z-10">
+          <div className="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8 py-4 sm:py-8 w-full relative z-10">
             <DashboardMembersBranchGenerationList persons={persons} />
           </div>
         )}
 
+        {/* VIEW: CÀNH (BRANCHES) */}
         {currentView === "branches" && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full relative z-10">
+          // Thêm overflow-x-auto để bảng không bị bóp méo
+          <div className="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8 py-4 w-full relative z-10 overflow-x-auto">
             <BranchesTable />
           </div>
         )}
 
+        {/* VIEW: GIỚI THIỆU & DANH NHÂN */}
         {currentView === "introduction" && (
-          <div className="relative">
+          <div className="relative w-full overflow-x-hidden">
             <Introduction />
           </div>
         )}
 
-        {currentView === "notables" && <NotablesList persons={persons} />}
+        {currentView === "notables" && (
+          <div className="w-full px-2">
+            <NotablesList persons={persons} />
+          </div>
+        )}
 
-        <div className="flex-1 w-full relative z-10">
+        {/* KHU VỰC HIỂN THỊ CÂY GIA PHẢ */}
+        <div className="flex-1 w-full relative z-10 overflow-hidden">
           {currentView === "tree" && (
             <FamilyTree
               personsMap={personsMap}
