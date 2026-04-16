@@ -17,36 +17,36 @@ export default function DashboardHeader({
   children,
 }: DashboardHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-stone-200 shadow-sm w-full">
-      <div className="w-full max-w-7xl mx-auto">
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-stone-200 shadow-sm w-full">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4">
         
-        {/* 1. BANNER: Sửa lỗi hở và chiếm chỗ */}
-        <Link href="/dashboard" className="block w-full bg-stone-50">
-          <img
-            src="/assets/images/banerds.jpg"
-            alt="BANNER"
-            // Trên mobile chỉ để h-12 hoặc h-14 để tiết kiệm không gian đứng
-            className="w-full h-12 sm:h-24 md:h-32 object-contain block mx-auto"
-          />
-        </Link>
-
-        {/* 2. THANH CÔNG CỤ: Fix lỗi "bóp view" và nhảy chữ G */}
-        <div className="flex items-center justify-between px-3 py-1.5 min-h-[50px] gap-2">
+        {/* CONTAINER 3 PHẦN: Align Center giúp mọi thứ thẳng hàng ngang */}
+        <div className="flex items-center justify-between h-14 sm:h-20 gap-2">
           
-          {/* Cụm Children (Tìm kiếm/Breadcrumb): 
-              Ép nó co lại nếu quá dài để không đẩy chữ G ra ngoài màn hình 
-          */}
-          <div className="flex-1 min-w-0 flex items-center overflow-hidden">
-            <div className="w-full truncate"> 
+          {/* PHẦN 1 (TRÁI): Chứa children (Breadcrumbs, Search hoặc nút quay lại) */}
+          <div className="flex-1 flex items-center min-w-0">
+            <div className="truncate">
               {children}
             </div>
           </div>
 
-          {/* Cụm HeaderMenu (Chữ G): 
-              Dùng flex-shrink-0 để đảm bảo nó LUÔN đứng yên một chỗ, không bao giờ bị nhảy dòng
-          */}
-          <div className="flex-shrink-0 flex items-center justify-end">
-            <HeaderMenu isAdmin={isAdmin} userEmail={userEmail} />
+          {/* PHẦN 2 (GIỮA): Ảnh Banner thu nhỏ - Đặt làm trọng tâm */}
+          <div className="flex-none flex justify-center items-center h-full">
+            <Link href="/dashboard" className="block h-full py-1">
+              <img
+                src="/assets/images/banerds.jpg"
+                alt="LOGO"
+                // h-12 trên mobile giúp Header cực kỳ gọn
+                className="h-10 sm:h-16 w-auto object-contain mx-auto"
+              />
+            </Link>
+          </div>
+
+          {/* PHẦN 3 (PHẢI): Chữ G (Menu dọc) */}
+          <div className="flex-1 flex justify-end items-center">
+            <div className="flex-shrink-0">
+              <HeaderMenu isAdmin={isAdmin} userEmail={userEmail} />
+            </div>
           </div>
 
         </div>
