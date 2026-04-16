@@ -6,9 +6,8 @@ import DashboardMembersBranchGenerationList from "@/components/DashboardMembersB
 import FamilyTree from "@/components/FamilyTree";
 import MindmapTree from "@/components/MindmapTree";
 import RootSelector from "@/components/RootSelector";
-import BranchesTable from "@/components/BranchesTable";
+// BỎ: BranchesTable và NotablesList vì không còn dùng trong menu
 import Introduction from "@/components/Introduction";
-import NotablesList from "@/components/NotablesList";
 import { Person, Relationship } from "@/types";
 import { useMemo } from "react";
 
@@ -66,13 +65,12 @@ export default function DashboardViews({
 
   return (
     <>
-      {/* THAY ĐỔI 1: Thêm w-full và min-w-0 để main không bị phình to hơn màn hình điện thoại */}
+      {/* SỬA LỖI MOBILE: min-w-0 để ngăn khung bị đẩy rộng hơn màn hình */}
       <main className="flex-1 bg-stone-50/50 flex flex-col w-full min-w-0">
         
         {(currentView === "tree" || currentView === "mindmap") &&
           persons.length > 0 &&
           activeRootId && (
-            /* THAY ĐỔI 2: Giảm px-4 xuống px-2 trên mobile để lấy không gian cho RootSelector */
             <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-6 pb-2 w-full flex flex-col sm:flex-row flex-wrap items-center sm:justify-between gap-4 relative z-20">
               <div className="flex items-center gap-3 sm:gap-4 flex-wrap w-full sm:w-auto justify-center sm:justify-start">
                 <RootSelector persons={persons} currentRootId={activeRootId} />
@@ -86,7 +84,6 @@ export default function DashboardViews({
           )}
 
         {currentView === "list" && (
-          /* THAY ĐỔI 3: px-4 -> px-2. Quan trọng: overflow-x-hidden để tránh bóp view danh sách */
           <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8 w-full relative z-10 overflow-x-hidden">
             <DashboardMemberList
               initialPersons={persons}
@@ -102,8 +99,7 @@ export default function DashboardViews({
           </div>
         )}
 
-        {/* THAY ĐỔI 4: Tạm ẩn hoặc Xóa mục branches (Các chi) theo yêu cầu của bạn */}
-        {currentView === "branches" && null} 
+        {/* ĐÃ XÓA: Mục Branches (Các chi) hoàn toàn khỏi logic render */}
 
         {currentView === "introduction" && (
           <div className="relative">
@@ -111,9 +107,8 @@ export default function DashboardViews({
           </div>
         )}
 
-        {currentView === "notables" && <NotablesList persons={persons} />}
+        {/* ĐÃ XÓA: Mục Notables (Danh nhân) hoàn toàn khỏi logic render */}
 
-        {/* THAY ĐỔI 5: overflow-hidden ở div bao quanh Cây để ngăn lỗi cuộn ngang toàn trang */}
         <div className="flex-1 w-full relative z-10 overflow-hidden">
           {currentView === "tree" && (
             <FamilyTree
