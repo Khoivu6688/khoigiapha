@@ -40,42 +40,41 @@ export default function AdminPrintConfig({ onConfirm, onClose }: AdminPrintConfi
   const isOverSize = currentTotal > totalUsable + 1;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl border-t-4 border-amber-600">
-        <h2 className="text-xl font-bold text-amber-900 mb-4 uppercase">Cấu hình thông số A0</h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-amber-100">
+        <h2 className="text-xl font-bold text-amber-900 mb-6 uppercase tracking-tight">Cấu hình thông số A0</h2>
         
         <div className="mb-6">
-          <label className="block text-sm font-bold mb-2 uppercase text-stone-500">Số lượng chi (Khoang):</label>
+          <label className="block text-xs font-black mb-3 uppercase text-stone-400">Số lượng chi (Khoang):</label>
           <div className="flex gap-2">
             {[1, 2, 3, 4, 5, 6].map((n) => (
               <button key={n} onClick={() => setNumLanes(n)}
-                className={`flex-1 py-2 rounded-md border-2 transition-all ${numLanes === n ? "border-amber-600 bg-amber-50 text-amber-700 font-bold" : "border-stone-200 bg-white"}`}>
+                className={`flex-1 py-2 rounded-lg border-2 transition-all ${numLanes === n ? "border-amber-600 bg-amber-50 text-amber-700 font-bold" : "border-stone-100 bg-white text-stone-400"}`}>
                 {n}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="space-y-3 mb-6">
-          <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Điều chỉnh độ rộng (mm)</p>
+        <div className="space-y-3 mb-6 max-h-[300px] overflow-y-auto pr-2">
           {laneWidths.map((w, i) => (
-            <div key={i} className="flex items-center justify-between bg-stone-50 p-3 rounded-lg border border-stone-200">
-              <span className="font-bold text-stone-600">Khoang {i + 1}</span>
+            <div key={i} className="flex items-center justify-between bg-stone-50 p-3 rounded-xl border border-stone-100">
+              <span className="font-bold text-stone-600 text-sm">Khoang {i + 1}</span>
               <div className="flex items-center gap-2">
                 <input type="number" value={w} onChange={(e) => handleWidthChange(i, Number(e.target.value))}
-                  className="w-20 text-center bg-transparent border-b-2 border-amber-500 focus:outline-none font-mono text-lg font-bold" />
-                <span className="text-stone-400 font-bold">mm</span>
+                  className="w-20 text-center bg-transparent border-b-2 border-amber-500 focus:outline-none font-mono text-lg font-bold text-amber-900" />
+                <span className="text-stone-400 text-xs font-bold uppercase">mm</span>
               </div>
             </div>
           ))}
         </div>
 
-        {isOverSize && <p className="text-red-500 text-xs mb-4 font-bold">⚠️ Tổng {currentTotal}mm vượt quá giới hạn A0!</p>}
+        {isOverSize && <p className="text-red-500 text-[10px] mb-4 font-bold animate-bounce text-center">⚠️ Tổng độ rộng vượt quá giới hạn A0!</p>}
 
         <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 py-3 font-bold text-stone-500 hover:bg-stone-100 rounded-lg">HỦY BỎ</button>
+          <button onClick={onClose} className="flex-1 py-3 font-bold text-stone-400 hover:text-stone-600 transition-colors">HỦY BỎ</button>
           <button disabled={isOverSize} onClick={() => onConfirm({ numLanes, laneWidths, laneXPositions: calculateXPositions() })}
-            className="flex-[2] bg-amber-600 text-white py-3 rounded-lg font-bold hover:bg-amber-700 disabled:bg-stone-300">
+            className="flex-[2] bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 disabled:bg-stone-200 disabled:text-stone-400 transition-all shadow-lg shadow-amber-200">
             XÁC NHẬN CHIẾT XUẤT
           </button>
         </div>
