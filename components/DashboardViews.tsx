@@ -1,9 +1,11 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Printer, X } from "lucide-react";
+import { useDashboard } from "./DashboardContext";
 import FamilyTree from "./FamilyTree";   
-import HeaderMenu from "./HeaderMenu";   
 import PrintA0View from "./PrintA0View"; 
+import AdminPrintConfig from "./AdminPrintConfig";
 
 interface DashboardViewsProps {
   persons: any[];
@@ -13,20 +15,19 @@ interface DashboardViewsProps {
   branches: any[];
   canEdit: boolean;
   isAdmin: boolean;
-  userEmail?: string;
 }
 
 export default function DashboardViews(props: DashboardViewsProps) {
-  const [view, setView] = useState("tree");
+  const { view, setView } = useDashboard();
   const [printConfig, setPrintConfig] = useState<any>(null);
 
-  // Chế độ in A0
-  if (view === "print_a0" && printConfig) {
+  // Chế độ xem trước bản in (Sau khi đã chọn thông số)
+  if (view === ("print_a0" as any) && printConfig) {
     return (
       <div className="fixed inset-0 z-[200] bg-stone-100 overflow-auto flex justify-center py-10 print:p-0">
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[210] flex gap-4 print:hidden">
-          <button onClick={() => setView("tree")} className="bg-stone-900 text-white px-6 py-2 rounded-full font-bold shadow-xl flex items-center gap-2">
-            <X size={16} /> Thoát in
+          <button onClick={() => setView("tree" as any)} className="bg-stone-900 text-white px-6 py-2 rounded-full font-bold shadow-xl flex items-center gap-2">
+            <X size={16} /> Thoát chế độ in
           </button>
           <button onClick={() => window.print()} className="bg-amber-600 text-white px-6 py-2 rounded-full font-bold shadow-xl flex items-center gap-2">
             <Printer size={16} /> Xác nhận in
@@ -37,27 +38,27 @@ export default function DashboardViews(props: DashboardViewsProps) {
     );
   }
 
-  // Chế độ xem cây mặc định (Giữ nguyên gốc)
   return (
-    <div className="w-full flex flex-col gap-4">
-      <div className="flex items-center justify-end print:hidden">
-        <HeaderMenu 
-          isAdmin={props.isAdmin} 
-          userEmail={props.userEmail} 
-          setView={setView} 
-          setPrintConfig={setPrintConfig} 
-        />
-      </div>
+    <div className="w-full relative min-h-[70vh]">
+      {/* Mặc định hiển thị sơ đồ cây */}
+      <FamilyTree 
+        personsMap={props.personsMap}
+        relationships={props.relationships}
+        roots={props.roots}
+        branches={props.branches}
+        canEdit={props.canEdit}
+      />
 
-      <div className="w-full relative min-h-[70vh]">
-        <FamilyTree 
-          personsMap={props.personsMap}
-          relationships={props.relationships}
-          roots={props.roots}
-          branches={props.branches}
-          canEdit={props.canEdit}
+      {/* Hiển thị Popup cấu hình khi Admin bấm tab "In gia phả A0" */}
+      {view === ("print_config" as any) && (
+        <AdminPrintConfig 
+          onClose={() => setView("tree" as any)}
+          onConfirm={(config) => {
+            setPrintConfig(config);
+            setView("print_a0" as any);
+          }}
         />
-      </div>
+      )}
 
       <style jsx global>{`
         @media print {
