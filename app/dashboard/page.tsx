@@ -13,11 +13,8 @@ interface PageProps {
 }
 
 export default async function FamilyTreePage({ searchParams }: PageProps) {
-  const { rootId, view = "list" } = await searchParams;
+  const { rootId } = await searchParams;
 
-  // If view is list, we only need persons, not relationships.
-  // We fetch persons for all views to pass down as a prop if we want, or let components fetch.
-  // For list view, we implement pagination to avoid loading too many members
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -29,73 +26,64 @@ export default async function FamilyTreePage({ searchParams }: PageProps) {
     redirect("/login");
   }
 
+  // 1. Lấy thông tin quyền hạn
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  const canEdit = profile?.role === "admin" || profile?.role === "editor";
+  const isAdmin = profile?.role === "admin";
+  const canEdit = isAdmin || profile?.role === "editor";
 
-  // For list view, implement pagination
-  const pageSize = 50; // 50 members per page
-  const page = 1; // Get from search params later
+  // 2. Fetch dữ liệu từ database
+  const [
+    { data: allPersons },
+    { data: relsData },
+    { data: branchesData }
+  ] = await Promise.all([
+    supabase.from("persons").select("*").order("birth_year", { ascending: true, nullsFirst: false }),
+    supabase.from("relationships").select("*"),
+    supabase.from("branches").select("*")
+  ]);
 
-  let personsData = [];
-  let relationships = [];
-  let branches = [];
+  const persons = allPersons || [];
+  const relationships = relsData || [];
+  const branches = branchesData || [];
 
-  // Always fetch all persons for search/filter to work properly
-  const { data: allPersons } = await supabase
-    .from("persons")
-    .select("*")
-    .order("birth_year", { ascending: true, nullsFirst: false });
-
-  const { data: relsData } = await supabase.from("relationships").select("*");
-  const { data: branchesData } = await supabase.from("branches").select("*");
-
-  personsData = allPersons || [];
-  relationships = relsData || [];
-  branches = branchesData || [];
-
-  const persons = personsData;
-
-  // Prepare map and roots for tree views
+  // 3. Chuẩn bị Map để tra cứu nhanh (Yêu cầu bởi DashboardViews)
   const personsMap = new Map();
   persons.forEach((p) => personsMap.set(p.id, p));
 
+  // 4. Xác định danh sách Roots (Yêu cầu bởi DashboardViews)
+  // Root là người không phải là con của bất kỳ ai trong bảng quan hệ
   const childIds = new Set(
     relationships
-      .filter(
-        (r) => r.type === "biological_child" || r.type === "adopted_child",
-      )
-      .map((r) => r.person_b),
+      .filter((r) => r.type === "biological_child" || r.type === "adopted_child")
+      .map((r) => r.person_b)
   );
-
-  let finalRootId = rootId;
-
-  // If no rootId is provided, fallback to the earliest created person
-  if (!finalRootId || !personsMap.has(finalRootId)) {
-    const rootsFallback = persons.filter((p) => !childIds.has(p.id));
-    if (rootsFallback.length > 0) {
-      finalRootId = rootsFallback[0].id;
-    } else if (persons.length > 0) {
-      finalRootId = persons[0].id; // ultimate fallback
-    }
-  }
+  
+  const roots = persons.filter((p) => !childIds.has(p.id));
 
   return (
     <DashboardProvider>
       <BranchProvider>
         <PrefixProvider>
           <div className="min-h-screen bg-stone-50/50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col">
-              <ViewToggle />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col pt-4">
+              {/* Truyền isAdmin vào ViewToggle để hiển thị nút Print A0 nếu cần */}
+              <ViewToggle isAdmin={isAdmin} />
+              
               <DashboardViews
                 persons={persons}
                 relationships={relationships}
                 branches={branches}
                 canEdit={canEdit}
+                // CÁC PROPS BỔ SUNG ĐỂ SỬA LỖI BUILD:
+                personsMap={personsMap}
+                roots={roots}
+                isAdmin={isAdmin}
+                userEmail={user.email}
               />
             </div>
           </div>
