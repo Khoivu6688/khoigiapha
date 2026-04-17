@@ -20,8 +20,6 @@ export default function DashboardMemberList({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(50);
   const [totalCount, setTotalCount] = useState(propTotalCount || 0);
-  const [loading, setLoading] = useState(false);
-
   const [filterOption, setFilterOption] = useState("all");
 
   const filteredPersons = initialPersons.filter((person) => {
@@ -49,7 +47,6 @@ export default function DashboardMemberList({
       case "first_child":
         matchesFilter = person.birth_order === 1;
         break;
-      case "all":
       default:
         matchesFilter = true;
         break;
@@ -58,7 +55,6 @@ export default function DashboardMemberList({
     return matchesSearch && matchesFilter;
   });
 
-  // Sort filtered persons
   const sortedPersons = [...filteredPersons].sort((a, b) => {
     switch (sortOption) {
       case "name_asc":
@@ -74,58 +70,45 @@ export default function DashboardMemberList({
       case "generation_desc":
         return (b.generation || 0) - (a.generation || 0);
       case "updated_asc":
-        return (
-          new Date(a.updated_at || 0).getTime() -
-          new Date(b.updated_at || 0).getTime()
-        );
-      case "updated_desc":
+        return new Date(a.updated_at || 0).getTime() - new Date(b.updated_at || 0).getTime();
       default:
-        return (
-          new Date(b.updated_at || 0).getTime() -
-          new Date(a.updated_at || 0).getTime()
-        );
+        return new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime();
     }
   });
 
-  // Pagination
   const totalPages = Math.ceil(sortedPersons.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedPersons = sortedPersons.slice(startIndex, endIndex);
+  const paginatedPersons = sortedPersons.slice(startIndex, startIndex + pageSize);
 
   useEffect(() => {
     setTotalCount(filteredPersons.length);
-  }, [filteredPersons]);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  // Reset to page 1 when search or filter changes
-  useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterOption]);
+  }, [searchTerm, filterOption, filteredPersons.length]);
 
   return (
-    <>
-      <div className="mb-8 relative">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/60 backdrop-blur-xl p-4 sm:p-5 rounded-2xl shadow-sm border border-stone-200/60 transition-all duration-300 relative z-10 w-full">
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto flex-1">
-            <div className="relative flex-1 max-w-sm group">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-stone-400 group-focus-within:text-amber-500 transition-colors" />
+    <div className="max-w-6xl mx-auto w-full -mt-4"> {/* Đẩy cao cả khối lên bằng -mt-4 và thu hẹp max-w */}
+      <div className="mb-6 relative">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 bg-white/70 backdrop-blur-md p-2.5 rounded-xl border border-stone-200/60 shadow-sm transition-all duration-300">
+          
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto flex-1 items-center">
+            {/* Thanh tìm kiếm nhỏ gọn hơn */}
+            <div className="relative w-full sm:w-64 group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-stone-400 group-focus-within:text-amber-500 transition-colors" />
               <input
                 type="text"
-                placeholder="Tìm kiếm thành viên..."
-                className="bg-white/90 text-stone-900 w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200/80 shadow-sm placeholder-stone-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-all"
+                placeholder="Tìm thành viên..."
+                className="bg-white/90 text-stone-900 w-full pl-9 pr-3 py-2 rounded-lg border border-stone-200/80 text-sm placeholder-stone-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/10 transition-all"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto items-center">
-              <div className="relative w-full sm:w-auto">
-                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 pointer-events-none" />
+
+            <div className="flex gap-2 w-full sm:w-auto">
+              {/* Thẻ Lọc nhỏ lại */}
+              <div className="relative">
+                <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-stone-400 pointer-events-none" />
                 <select
-                  className="appearance-none bg-white/90 text-stone-700 w-full sm:w-40 pl-9 pr-8 py-2.5 rounded-xl border border-stone-200/80 shadow-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 hover:border-amber-300 font-medium text-sm transition-all focus:bg-white"
+                  className="appearance-none bg-white/90 text-stone-700 w-28 pl-8 pr-7 py-2 rounded-lg border border-stone-200/80 text-xs font-semibold focus:outline-none focus:border-amber-400 transition-all cursor-pointer"
                   value={filterOption}
                   onChange={(e) => setFilterOption(e.target.value)}
                 >
@@ -135,127 +118,85 @@ export default function DashboardMemberList({
                   <option value="in_law_female">Dâu</option>
                   <option value="in_law_male">Rể</option>
                   <option value="deceased">Đã mất</option>
-                  <option value="first_child">Con trưởng</option>
                 </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                  <svg
-                    className="size-4 text-stone-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    ></path>
-                  </svg>
+                <div className="absolute inset-y-0 right-1.5 flex items-center pointer-events-none">
+                  <ArrowUpDown className="size-3 text-stone-300" />
                 </div>
               </div>
 
-              <div className="relative w-full sm:w-auto">
-                <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 pointer-events-none" />
+              {/* Thẻ Sắp xếp nhỏ lại */}
+              <div className="relative">
+                <ArrowUpDown className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-stone-400 pointer-events-none" />
                 <select
-                  className="appearance-none bg-white/90 text-stone-700 w-full sm:w-52 pl-9 pr-8 py-2.5 rounded-xl border border-stone-200/80 shadow-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 hover:border-amber-300 font-medium text-sm transition-all focus:bg-white"
+                  className="appearance-none bg-white/90 text-stone-700 w-40 pl-8 pr-7 py-2 rounded-lg border border-stone-200/80 text-xs font-semibold focus:outline-none focus:border-amber-400 transition-all cursor-pointer"
                   value={sortOption}
                   onChange={(e) => setSortOption(e.target.value)}
                 >
-                  <option value="birth_asc">Năm sinh (Tăng dần)</option>
-                  <option value="birth_desc">Năm sinh (Giảm dần)</option>
-                  <option value="name_asc">Tên (A-Z)</option>
-                  <option value="name_desc">Tên (Z-A)</option>
-                  <option value="updated_desc">Cập nhật (Mới nhất)</option>
-                  <option value="updated_asc">Cập nhật (Cũ nhất)</option>
-                  <option value="generation_asc">Theo thế hệ (Tăng dần)</option>
-                  <option value="generation_desc">
-                    Theo thế hệ (Giảm dần)
-                  </option>
+                  <option value="birth_asc">Năm sinh ↑</option>
+                  <option value="birth_desc">Năm sinh ↓</option>
+                  <option value="name_asc">Tên A-Z</option>
+                  <option value="updated_desc">Mới nhất</option>
+                  <option value="generation_asc">Đời ↑</option>
                 </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                  <svg
-                    className="size-4 text-stone-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    ></path>
-                  </svg>
+                <div className="absolute inset-y-0 right-1.5 flex items-center pointer-events-none">
+                  <ArrowUpDown className="size-3 text-stone-300" />
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Nút thêm mới nhỏ gọn */}
           {canEdit && (
-            <Link href="/dashboard/members/new" className="btn-primary">
-              <Plus className="size-4" strokeWidth={2.5} />
-              Thêm thành viên
+            <Link 
+              href="/dashboard/members/new" 
+              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm shadow-amber-200 whitespace-nowrap"
+            >
+              <Plus className="size-3.5" strokeWidth={3} />
+              Thêm mới
             </Link>
           )}
         </div>
       </div>
 
+      {/* Grid danh sách */}
       {paginatedPersons.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {paginatedPersons.map((person) => (
             <PersonCard key={person.id} person={person} />
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-stone-400 italic">
-          {initialPersons.length > 0
-            ? "Không tìm thấy thành viên phù hợp."
-            : "Chưa có thành viên nào. Hãy thêm thành viên đầu tiên."}
+        <div className="text-center py-10 text-stone-400 text-sm italic">
+          Không tìm thấy thành viên phù hợp.
         </div>
       )}
 
-      {/* Pagination */}
+      {/* Phân trang tinh gọn */}
       {sortedPersons.length > pageSize && (
-        <div className="flex justify-center items-center gap-2 mt-8">
+        <div className="flex justify-center items-center gap-2 mt-8 mb-10">
           <button
-            onClick={() => handlePageChange(currentPage - 1)}
+            onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-3 py-2 border border-stone-300 rounded-lg hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-1.5 text-xs font-medium border border-stone-200 rounded-md hover:bg-stone-50 disabled:opacity-30 transition-colors"
           >
             Trước
           </button>
-
-          <div className="flex items-center gap-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`w-10 h-10 rounded-lg border transition-colors ${
-                  currentPage === page
-                    ? "bg-amber-500 text-white border-amber-500"
-                    : "border-stone-300 hover:bg-stone-50 text-stone-700"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-
+          <span className="text-xs text-stone-500 font-medium px-4">
+            Trang {currentPage} / {totalPages}
+          </span>
           <button
-            onClick={() => handlePageChange(currentPage + 1)}
+            onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-3 py-2 border border-stone-300 rounded-lg hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-1.5 text-xs font-medium border border-stone-200 rounded-md hover:bg-stone-50 disabled:opacity-30 transition-colors"
           >
             Sau
           </button>
         </div>
       )}
 
-      {/* Results Info */}
-      <div className="text-center text-sm text-stone-600 mt-4">
-        Hiển thị {paginatedPersons.length} / {sortedPersons.length} thành viên
-        {sortedPersons.length > pageSize &&
-          ` - Trang ${currentPage}/${totalPages}`}
+      <div className="text-center text-[11px] text-stone-400 mt-2 mb-8 uppercase tracking-wider">
+        Tổng số: {sortedPersons.length} thành viên
       </div>
-    </>
+    </div>
   );
 }
