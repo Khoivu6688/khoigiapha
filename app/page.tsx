@@ -1,32 +1,63 @@
-"use client";
+import { DashboardProvider } from "@/components/DashboardContext";
+import { BranchProvider } from "@/components/BranchContext";
+import { PrefixProvider } from "@/components/PrefixContext";
+import DashboardViews from "@/components/DashboardViews";
+import MemberDetailModal from "@/components/MemberDetailModal";
+import ViewToggle from "@/components/ViewToggle";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-import { useEffect, useState } from "react";
-import Footer from "@/components/Footer";
-import LandingHero from "@/components/LandingHero";
-import config from "./config";
+export default async function FamilyTreePage({ searchParams }: { searchParams: Promise<{ rootId?: string }> }) {
+  const { rootId } = await searchParams;
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
 
-export default function HomePage() {
-  const [showOverlay, setShowOverlay] = useState(true);
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-  useEffect(() => {
-    const seen = localStorage.getItem("seenLanding");
-    if (seen) setShowOverlay(false);
-  }, []);
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const isAdmin = profile?.role === "admin";
+  const canEdit = isAdmin || profile?.role === "editor";
 
-  // 👇 Khi overlay đang hiện → KHÔNG render gì phía dưới
-  if (showOverlay) return null;
+  const [{ data: allPersons }, { data: relsData }, { data: branchesData }] = await Promise.all([
+    supabase.from("persons").select("*").order("birth_year", { ascending: true }),
+    supabase.from("relationships").select("*"),
+    supabase.from("branches").select("*")
+  ]);
+
+  const persons = allPersons || [];
+  const relationships = relsData || [];
+  const branches = branchesData || [];
+
+  const personsMap = new Map();
+  persons.forEach((p) => personsMap.set(p.id, p));
+
+  const childIds = new Set(relationships.filter((r) => r.type.includes("child")).map((r) => r.person_b));
+  const roots = persons.filter((p) => !childIds.has(p.id));
 
   return (
-    <div className="min-h-screen bg-[#fafaf9] flex flex-col relative overflow-x-hidden">
-
-      {/* nền nhẹ lại (không cần quá nhiều effect) */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_50%_-20%,#fef3c7,transparent)] pointer-events-none" />
-
-      <main className="flex-1 flex items-center justify-center px-4 py-20 relative z-10">
-        <LandingHero siteName={config.siteName} />
-      </main>
-
-      <Footer className="bg-transparent relative z-10 border-none" />
-    </div>
+    <DashboardProvider>
+      <BranchProvider>
+        <PrefixProvider>
+          <div className="min-h-screen bg-stone-50/50">
+            <div className="max-w-7xl mx-auto px-4 flex flex-col pt-4">
+              <ViewToggle />
+              <DashboardViews
+                persons={persons}
+                personsMap={personsMap}
+                relationships={relationships}
+                roots={roots}
+                branches={branches}
+                canEdit={canEdit}
+                isAdmin={isAdmin}
+                userEmail={user.email}
+              />
+            </div>
+          </div>
+          <MemberDetailModal />
+        </PrefixProvider>
+      </BranchProvider>
+    </DashboardProvider>
   );
 }
