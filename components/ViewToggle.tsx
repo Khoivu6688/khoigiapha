@@ -9,10 +9,11 @@ import {
   BookOpen,
   Filter,
   Users,
+  Printer, // Thêm icon máy in
 } from "lucide-react";
 import { useDashboard } from "./DashboardContext";
 
-// Get rootId from environment variable
+// Lấy rootId từ biến môi trường
 const ROOT_ID =
   process.env.NEXT_PUBLIC_ROOT_ID || "a4167ee0-df91-4a9c-a7d1-ab4e88ffa4d0";
 
@@ -23,9 +24,15 @@ export type ViewMode =
   | "mindmap"
   | "branches"
   | "introduction"
-  | "notables";
+  | "notables"
+  | "print_config"; // Thêm mode mới vào type
 
-export default function ViewToggle() {
+// SỬA LỖI QUAN TRỌNG: Thêm interface để nhận prop isAdmin từ page.tsx
+interface ViewToggleProps {
+  isAdmin?: boolean;
+}
+
+export default function ViewToggle({ isAdmin }: ViewToggleProps) {
   const { view: currentView, setView, setRootId } = useDashboard();
 
   const tabs = [
@@ -49,13 +56,13 @@ export default function ViewToggle() {
     },
     {
       id: "notables",
-      label: "Danh nhân dòng họ",
+      label: "Danh nhân",
       icon: <Users className="size-4" />,
     },
   ] as const;
 
   return (
-    <div className="flex bg-white/80 p-1.5 rounded-full shadow-sm w-fit mx-auto mt-6 mb-4 relative border border-stone-200/60 backdrop-blur-md z-50 transition-all duration-300">
+    <div className="flex items-center bg-white/80 p-1.5 rounded-full shadow-sm w-fit mx-auto mt-6 mb-4 relative border border-stone-200/60 backdrop-blur-md z-50 transition-all duration-300 overflow-x-auto no-scrollbar max-w-[95vw]">
       {tabs.map((tab) => {
         const isActive = currentView === tab.id;
 
@@ -63,21 +70,14 @@ export default function ViewToggle() {
           <button
             key={tab.id}
             onClick={() => {
-              // When switching to tree or mindmap, set view and rootId directly for faster response
-              if (tab.id === "tree") {
-                setView("tree");
+              if (tab.id === "tree" || tab.id === "mindmap") {
+                setView(tab.id);
                 setRootId(ROOT_ID);
                 return;
               }
-              if (tab.id === "mindmap") {
-                setView("mindmap");
-                setRootId(ROOT_ID);
-                return;
-              }
-              // For other views, use normal setView
               setView(tab.id as ViewMode);
             }}
-            className={`relative px-4 sm:px-6 py-1.5 sm:py-2.5 text-sm font-semibold rounded-full transition-colors duration-300 ease-in-out z-10 flex items-center gap-2 ${
+            className={`relative flex-shrink-0 px-4 sm:px-6 py-1.5 sm:py-2.5 text-sm font-semibold rounded-full transition-colors duration-300 ease-in-out z-10 flex items-center gap-2 ${
               isActive
                 ? "text-stone-900"
                 : "text-stone-500 hover:text-stone-800"
@@ -99,10 +99,25 @@ export default function ViewToggle() {
               {tab.icon}
             </span>
 
-            <span className="tracking-wide">{tab.label}</span>
+            <span className="tracking-wide whitespace-nowrap">{tab.label}</span>
           </button>
         );
       })}
+
+      {/* NÚT IN GIA PHẢ A0 - CHỈ HIỂN THỊ KHI LÀ ADMIN */}
+      {isAdmin && (
+        <button
+          onClick={() => setView("print_config" as any)}
+          className={`relative flex-shrink-0 px-4 sm:px-6 py-1.5 sm:py-2.5 text-sm font-bold rounded-full transition-all duration-300 z-10 flex items-center gap-2 ml-2 border-l border-stone-200 pl-4 ${
+            currentView === "print_config"
+              ? "text-amber-700 bg-amber-50/50"
+              : "text-amber-600 hover:text-amber-800"
+          }`}
+        >
+          <Printer className="size-4" />
+          <span className="tracking-wide whitespace-nowrap">In gia phả A0</span>
+        </button>
+      )}
     </div>
   );
 }
