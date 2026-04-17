@@ -1,11 +1,10 @@
 "use client";
-
 import React, { useState } from "react";
 import { Printer, X } from "lucide-react";
-import FamilyTree from "./FamilyTree";   // File bạn đã gửi
-import TreeToolbar from "./TreeToolbar"; // File toolbar cũ
-import HeaderMenu from "./HeaderMenu";   // Menu mới chứa nút in
-import PrintA0View from "./PrintA0View"; // View in mới
+import FamilyTree from "./FamilyTree";   
+import TreeToolbar from "./TreeToolbar"; 
+import HeaderMenu from "./HeaderMenu";   
+import PrintA0View from "./PrintA0View"; 
 
 interface DashboardViewsProps {
   persons: any[];
@@ -18,70 +17,55 @@ interface DashboardViewsProps {
   userEmail?: string;
 }
 
-export default function DashboardViews({ 
-  persons, personsMap, relationships, roots, branches, canEdit, isAdmin, userEmail 
-}: DashboardViewsProps) {
-  
+export default function DashboardViews(props: DashboardViewsProps) {
   const [view, setView] = useState("tree");
   const [printConfig, setPrintConfig] = useState<any>(null);
 
-  // Render logic
-  const renderContent = () => {
-    // Nếu chọn view in A0
-    if (view === "print_a0" && printConfig) {
-      return (
-        <div className="fixed inset-0 z-[200] bg-stone-100 overflow-auto flex justify-center py-10 print:p-0 print:bg-white">
-          <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[210] flex gap-4 print:hidden">
-            <button onClick={() => setView("tree")} className="bg-stone-900 text-white px-6 py-2 rounded-full font-bold shadow-xl flex items-center gap-2">
-              <X size={16} /> Thoát chế độ in
-            </button>
-            <button onClick={() => window.print()} className="bg-amber-600 text-white px-6 py-2 rounded-full font-bold shadow-xl flex items-center gap-2">
-              <Printer size={16} /> In PDF (Khổ A0)
-            </button>
-          </div>
-          <PrintA0View persons={persons} config={printConfig} />
-        </div>
-      );
-    }
-
-    // MẶC ĐỊNH: Trả về TreeView cũ của bạn
-    return (
-      <FamilyTree 
-        personsMap={personsMap}
-        relationships={relationships}
-        roots={roots}
-        branches={branches}
-        canEdit={canEdit}
-      />
-    );
-  };
-
   return (
-    <div className="w-full relative">
-      {/* 1. Header ẩn khi in - Chứa Toolbar cũ và Menu chọn In */}
-      <div className="flex items-center justify-between mb-4 print:hidden">
+    <div className="w-full flex flex-col gap-4">
+      {/* THANH ĐIỀU KHIỂN TRÊN CÙNG */}
+      <div className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm border border-stone-200 print:hidden">
         <div className="flex items-center gap-2">
-          {/* File TreeToolbar.tsx cũ của bạn sẽ tìm ID portal ở đây */}
           <TreeToolbar /> 
         </div>
 
+        {/* TRUYỀN ĐỦ SETVIEW VÀ SETPRINTCONFIG VÀO ĐÂY */}
         <HeaderMenu 
-          isAdmin={isAdmin} 
-          userEmail={userEmail} 
+          isAdmin={props.isAdmin} 
+          userEmail={props.userEmail} 
           setView={setView} 
           setPrintConfig={setPrintConfig} 
         />
       </div>
 
-      {/* 2. Nội dung hiển thị */}
-      <div className="w-full">
-        {renderContent()}
+      <div className="w-full relative min-h-[70vh]">
+        {view === "print_a0" && printConfig ? (
+          <div className="fixed inset-0 z-[200] bg-stone-100 overflow-auto flex justify-center py-10 print:p-0">
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[210] flex gap-4 print:hidden">
+              <button onClick={() => setView("tree")} className="bg-stone-900 text-white px-6 py-2 rounded-full font-bold shadow-xl flex items-center gap-2">
+                <X size={16} /> Thoát
+              </button>
+              <button onClick={() => window.print()} className="bg-amber-600 text-white px-6 py-2 rounded-full font-bold shadow-xl flex items-center gap-2">
+                <Printer size={16} /> Bắt đầu in A0
+              </button>
+            </div>
+            <PrintA0View persons={props.persons} config={printConfig} />
+          </div>
+        ) : (
+          <FamilyTree 
+            personsMap={props.personsMap}
+            relationships={props.relationships}
+            roots={props.roots}
+            branches={props.branches}
+            canEdit={props.canEdit}
+          />
+        )}
       </div>
 
       <style jsx global>{`
         @media print {
           .print\:hidden { display: none !important; }
-          body { background: white !important; margin: 0; }
+          body { background: white !important; }
           @page { size: A0 landscape; margin: 0; }
         }
       `}</style>
