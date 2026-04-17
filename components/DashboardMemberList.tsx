@@ -52,69 +52,65 @@ export default function DashboardMemberList({
   }, [searchTerm, filterOption]);
 
   return (
-    <div className="max-w-6xl mx-auto w-full -mt-8">
+    <div className="max-w-6xl mx-auto w-full -mt-2"> {/* Đã hạ thấp xuống bằng cách đổi từ -mt-8 thành -mt-2 */}
       <div className="mb-6">
-        {/* Thanh công cụ chính */}
-        <div className="flex flex-col md:flex-row items-center gap-2 bg-white/70 backdrop-blur-md p-1.5 rounded-xl border border-stone-200/60 shadow-sm transition-all">
+        {/* Container chính: Trên mobile sẽ dàn hàng dọc nhẹ nhàng, các nút ngang sẽ có scroll nếu tràn */}
+        <div className="flex flex-col lg:flex-row items-center gap-3 bg-white/75 backdrop-blur-md p-2 rounded-xl border border-stone-200/60 shadow-sm">
           
-          {/* 1. Ô Tìm kiếm: Co giãn linh hoạt */}
-          <div className="relative flex-1 w-full">
+          {/* 1. Ô Tìm kiếm: Chiếm toàn bộ không gian còn lại */}
+          <div className="relative w-full flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-400" />
             <input
               type="text"
-              placeholder="Tìm thành viên..."
-              className="w-full h-10 pl-9 pr-3 bg-white/50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/10 transition-all"
+              placeholder="Tìm tên thành viên..."
+              className="w-full h-10 pl-9 pr-3 bg-white/50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-amber-400 transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          {/* Nhóm các nút chức năng cố định 120px */}
-          <div className="flex flex-row gap-2 items-center w-full md:w-auto">
+          {/* Nhóm các nút chức năng: Ép ngang trên mọi thiết bị để không bị kéo cao khung */}
+          <div className="flex flex-row gap-2 items-center w-full lg:w-auto overflow-x-auto no-scrollbar pb-1 lg:pb-0 flex-nowrap">
             
-            {/* 2. Thẻ Lọc: Fix 120px */}
-            <div className="relative w-[120px] flex-shrink-0">
-              <Filter className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-stone-400 pointer-events-none" />
+            {/* 2. Thẻ Lọc: Fix 140px */}
+            <div className="relative w-[140px] flex-shrink-0">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-stone-400 pointer-events-none" />
               <select
-                className="appearance-none w-full h-10 pl-7 pr-6 bg-white/50 border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 cursor-pointer focus:outline-none focus:border-amber-400 transition-all uppercase tracking-tight"
+                className="appearance-none w-full h-10 pl-8 pr-7 bg-white/60 border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 cursor-pointer focus:outline-none focus:border-amber-400 uppercase tracking-tighter"
                 value={filterOption}
                 onChange={(e) => setFilterOption(e.target.value)}
               >
-                <option value="all">Tất cả</option>
-                <option value="male">Nam</option>
-                <option value="female">Nữ</option>
-                <option value="deceased">Đã mất</option>
+                <option value="all">TẤT CẢ</option>
+                <option value="male">NAM</option>
+                <option value="female">NỮ</option>
+                <option value="deceased">ĐÃ MẤT</option>
               </select>
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                <ArrowUpDown className="size-3 text-stone-300" />
-              </div>
+              <ArrowUpDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3 text-stone-300 pointer-events-none" />
             </div>
 
-            {/* 3. Thẻ Sắp xếp: Fix 120px */}
-            <div className="relative w-[120px] flex-shrink-0">
-              <ArrowUpDown className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-stone-400 pointer-events-none" />
+            {/* 3. Thẻ Sắp xếp: Fix 140px */}
+            <div className="relative w-[140px] flex-shrink-0">
+              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-stone-400 pointer-events-none" />
               <select
-                className="appearance-none w-full h-10 pl-7 pr-6 bg-white/50 border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 cursor-pointer focus:outline-none focus:border-amber-400 transition-all uppercase tracking-tight"
+                className="appearance-none w-full h-10 pl-8 pr-7 bg-white/60 border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 cursor-pointer focus:outline-none focus:border-amber-400 uppercase tracking-tighter"
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}
               >
-                <option value="updated_desc">Mới nhất</option>
-                <option value="birth_asc">Năm sinh ↑</option>
-                <option value="name_asc">Tên A-Z</option>
+                <option value="updated_desc">MỚI NHẤT</option>
+                <option value="birth_asc">NĂM SINH ↑</option>
+                <option value="name_asc">TÊN A-Z</option>
               </select>
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                <ArrowUpDown className="size-3 text-stone-300" />
-              </div>
+              <ArrowUpDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3 text-stone-300 pointer-events-none" />
             </div>
 
-            {/* 4. Nút Thêm mới: Fix 120px */}
+            {/* 4. Nút Thêm mới: Fix 160px */}
             {canEdit && (
               <Link 
                 href="/dashboard/members/new" 
-                className="flex items-center justify-center gap-1 bg-amber-500 hover:bg-amber-600 text-white w-[120px] h-10 rounded-lg text-[11px] font-bold transition-all shadow-sm active:scale-95 uppercase tracking-tight flex-shrink-0"
+                className="flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white w-[160px] h-10 rounded-lg text-[11px] font-bold transition-all shadow-sm flex-shrink-0 uppercase"
               >
                 <Plus className="size-3.5" strokeWidth={3} />
-                Thêm mới
+                Thêm thành viên
               </Link>
             )}
           </div>
@@ -129,36 +125,36 @@ export default function DashboardMemberList({
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-stone-400 text-sm italic border-2 border-dashed border-stone-200 rounded-2xl">
-          Không tìm thấy thành viên nào phù hợp.
+        <div className="text-center py-12 text-stone-400 text-sm italic border-2 border-dashed border-stone-100 rounded-2xl">
+          Không tìm thấy kết quả phù hợp.
         </div>
       )}
 
-      {/* Phân trang tinh gọn */}
-      <div className="mt-10 flex flex-col items-center gap-4 mb-12">
+      {/* Phân trang */}
+      <div className="mt-8 flex flex-col items-center gap-4 mb-10">
         {sortedPersons.length > pageSize && (
           <div className="flex items-center gap-1">
             <button 
               onClick={() => setCurrentPage(p => Math.max(1, p-1))} 
               disabled={currentPage === 1}
-              className="px-4 py-1.5 text-xs font-bold border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-30 transition-all"
+              className="px-4 py-1.5 text-xs font-bold border border-stone-200 rounded-lg disabled:opacity-30 bg-white"
             >
-              Trở lại
+              TRƯỚC
             </button>
             <div className="px-4 text-xs font-bold text-stone-500">
-              Trang {currentPage} / {totalPages}
+              {currentPage} / {totalPages}
             </div>
             <button 
               onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} 
               disabled={currentPage === totalPages}
-              className="px-4 py-1.5 text-xs font-bold border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-30 transition-all"
+              className="px-4 py-1.5 text-xs font-bold border border-stone-200 rounded-lg disabled:opacity-30 bg-white"
             >
-              Tiếp theo
+              SAU
             </button>
           </div>
         )}
-        <div className="text-[10px] text-stone-400 uppercase tracking-[0.2em] font-black">
-          Hệ thống ghi nhận: {sortedPersons.length} thành viên
+        <div className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+          Ghi nhận {sortedPersons.length} kết quả
         </div>
       </div>
     </div>
