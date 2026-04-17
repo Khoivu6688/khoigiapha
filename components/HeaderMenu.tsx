@@ -1,189 +1,69 @@
 "use client";
-
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  BarChart2,
-  CalendarClock,
-  ChevronDown,
-  Database,
-  GitMerge,
-  Info,
-  KeyRound,
-  Network,
-  UserCircle,
-  Users,
-  FileText,
-  Settings,
-  Printer, // Thêm icon mới
-} from "lucide-react";
+import { ChevronDown, UserCircle, Users, FileText, Network, Database, Settings, CalendarClock, GitMerge, BarChart2, KeyRound, Info, Printer } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import LogoutButton from "./LogoutButton";
-import AdminPrintConfig from "./AdminPrintConfig"; // Import bảng cấu hình mm
+import AdminPrintConfig from "./AdminPrintConfig";
 
 interface HeaderMenuProps {
   isAdmin: boolean;
   userEmail?: string;
-  // THÊM 2 PROPS NÀY ĐỂ ĐIỀU KHIỂN DASHBOARD
-  setView: (view: string) => void; 
+  setView: (view: string) => void;
   setPrintConfig: (config: any) => void;
 }
 
 export default function HeaderMenu({ isAdmin, userEmail, setView, setPrintConfig }: HeaderMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [showA0Config, setShowA0Config] = useState(false); // State quản lý modal A0
+  const [showA0Config, setShowA0Config] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    const handleClick = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setIsOpen(false); };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
   return (
     <div className="relative" ref={menuRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 pl-2 pr-4 py-1.5 rounded-full hover:bg-stone-100 transition-all duration-200 border border-transparent hover:border-stone-200"
-      >
-        <div className="size-8 rounded-full bg-linear-to-br from-amber-200 to-amber-100 text-amber-800 flex items-center justify-center font-bold shadow-sm ring-1 ring-amber-300/50">
+      <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 pl-2 pr-4 py-1.5 rounded-full hover:bg-stone-100 transition-all border border-transparent hover:border-stone-200 bg-white shadow-sm">
+        <div className="size-8 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold shadow-inner ring-1 ring-amber-200">
           {userEmail ? userEmail.charAt(0).toUpperCase() : <UserCircle className="size-5" />}
         </div>
-        <ChevronDown className={`size-4 text-stone-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown className={`size-4 text-stone-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-stone-200/60 py-2 z-50 overflow-hidden"
-          >
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+            className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-stone-200 py-2 z-50 overflow-hidden">
+            
             <div className="px-4 py-3 border-b border-stone-100 bg-stone-50/50">
-              <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-0.5">Tài khoản</p>
-              <p className="text-sm font-medium text-stone-900 truncate">{userEmail}</p>
+              <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">Tài khoản</p>
+              <p className="text-sm font-bold text-stone-900 truncate">{userEmail}</p>
             </div>
 
-            <div className="py-1 max-h-[70vh] overflow-y-auto"> {/* Thêm scroll nếu menu quá dài */}
+            <div className="py-1 max-h-[70vh] overflow-y-auto">
               {isAdmin && (
                 <>
-                  {/* NÚT XUẤT BẢN IN A0 MỚI */}
-                  <button
-                    onClick={() => {
-                      setIsOpen(false);
-                      setShowA0Config(true);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors w-full text-left border-b border-amber-100"
-                  >
-                    <Printer className="size-4" />
-                    Xuất bản in A0
+                  <button onClick={() => { setIsOpen(false); setShowA0Config(true); }}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-black text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors w-full text-left">
+                    <Printer className="size-4" /> THIẾT LẬP IN A0
                   </button>
-
-                  <Link
-                    href="/dashboard/users"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors"
-                  >
-                    <Users className="size-4" />
-                    Quản lý Người dùng
-                  </Link>
-                  <Link
-                    href="/dashboard/simple-logs"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors"
-                  >
-                    <FileText className="size-4" />
-                    Nhật ký hoạt động
-                  </Link>
-                  <Link
-                    href="/dashboard/lineage"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors"
-                  >
-                    <Network className="size-4" />
-                    Thứ tự gia phả
-                  </Link>
-                  <Link
-                    href="/dashboard/data"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors"
-                  >
-                    <Database className="size-4" />
-                    Sao lưu & Phục hồi
-                  </Link>
-                  <Link
-                    href="/dashboard/config"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors"
-                  >
-                    <Settings className="size-4" />
-                    Cấu hình trang web
-                  </Link>
+                  <Link href="/dashboard/users" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 transition-colors"><Users className="size-4" /> Quản lý Người dùng</Link>
+                  <Link href="/dashboard/data" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 transition-colors"><Database className="size-4" /> Sao lưu & Phục hồi</Link>
                 </>
               )}
-              
-              {/* Các Link khác giữ nguyên... */}
-              <Link
-                href="/dashboard/events"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors"
-              >
-                <CalendarClock className="size-4" />
-                Sự kiện
-              </Link>
-              {/* ... tiếp tục các link GitMerge, BarChart2, v.v ... */}
-              
-              <Link
-                href="/dashboard/stats"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors"
-              >
-                <BarChart2 className="size-4" />
-                Thống kê gia phả
-              </Link>
-
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  const event = new CustomEvent("openChangePasswordModal");
-                  window.dispatchEvent(event);
-                }}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors w-full text-left"
-              >
-                <KeyRound className="size-4" />
-                Đổi mật khẩu
-              </button>
-
-              <Link
-                href="/about"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors"
-              >
-                <Info className="size-4" />
-                Giới thiệu & Liên hệ
-              </Link>
+              <button onClick={() => { setView("tree"); setIsOpen(false); }} className="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 transition-colors"><Network className="size-4" /> Xem sơ đồ cây</button>
               <LogoutButton />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* MODAL CẤU HÌNH IN HIỆN RA KHI BẤM NÚT */}
       {showA0Config && (
-        <AdminPrintConfig
-          onClose={() => setShowA0Config(false)}
-          onConfirm={(configData) => {
-            setPrintConfig(configData); // Lưu mm
-            setView("print_a0");        // Chuyển view
-            setShowA0Config(false);
-          }}
-        />
+        <AdminPrintConfig onClose={() => setShowA0Config(false)} 
+          onConfirm={(data) => { setPrintConfig(data); setView("print_a0"); setShowA0Config(false); }} />
       )}
     </div>
   );
