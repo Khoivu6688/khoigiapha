@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, Printer, Settings, LogOut } from "lucide-react";
 import AdminPrintConfig from "./AdminPrintConfig";
 
-// SỬA: Thêm dấu "?" để setView và setPrintConfig là tùy chọn (Optional)
 interface HeaderMenuProps {
   isAdmin: boolean;
   userEmail?: string;
@@ -16,7 +15,6 @@ export default function HeaderMenu({ isAdmin, userEmail, setView, setPrintConfig
   const [showConfig, setShowConfig] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Đóng menu khi click ngoài
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setIsOpen(false);
@@ -36,22 +34,21 @@ export default function HeaderMenu({ isAdmin, userEmail, setView, setPrintConfig
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-white border border-stone-200 rounded-2xl shadow-xl py-2 z-50">
-          <div className="px-4 py-2 border-b border-stone-100 mb-1 text-sm font-medium truncate text-stone-500 italic">
+          <div className="px-4 py-2 border-b border-stone-100 mb-1 text-sm text-stone-500 italic">
             {userEmail}
           </div>
 
-          {/* CHỈ HIỆN NÚT IN NẾU CÓ ĐỦ HÀM ĐIỀU KHIỂN (Trong DashboardViews) */}
           {isAdmin && setView && setPrintConfig && (
             <button 
               onClick={() => { setShowConfig(true); setIsOpen(false); }}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-amber-700 hover:bg-amber-50 font-bold"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-amber-700 hover:bg-amber-50 font-bold font-sans"
             >
               <Printer size={16} /> THIẾT LẬP IN A0
             </button>
           )}
 
-          <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50"><Settings size={16} /> Cấu hình</button>
-          <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"><LogOut size={16} /> Đăng xuất</button>
+          <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 transition-colors"><Settings size={16} /> Cấu hình</button>
+          <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"><LogOut size={16} /> Đăng xuất</button>
         </div>
       )}
 
