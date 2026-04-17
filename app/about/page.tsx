@@ -35,7 +35,7 @@ export default function AboutPage() {
 
             <div className="max-w-none">
               <p className="text-stone-600 leading-relaxed text-[15px] mb-8">
-                <strong className="text-stone-800">Gia Phả OS</strong> 
+                <strong className="text-stone-800"></strong> 
                 Trang gia phả điện tử này được lập nên với tấm lòng thành kính nhằm lưu giữ anh linh
                 của tổ tiên và ghi dấu công đức của các bậc tiền hiền họ Vũ Bá - nghành II Xã Vũ Hội,
                 Vũ Thư, Thái Bình . Đây không chỉ là cuốn sử liệu của dòng họ mà còn là nhịp cầu kết 
@@ -92,7 +92,7 @@ export default function AboutPage() {
                     <strong className="text-stone-800">Demo công khai:</strong>{" "}
                    /* Trang demo tại{" "}
                     <code className="bg-white border border-stone-200 px-1 py-0.5 rounded text-[13px] text-amber-700">
-                      giapha-os.homielab.com
+                      
                     </code>{" "}
                     sử dụng dữ liệu mẫu hư cấu, không chứa thông tin của người
                     thật. Không nên nhập thông tin cá nhân thật vào trang demo.
