@@ -1,124 +1,138 @@
 "use client";
 
-import React, { useState } from "react";
-import { Printer, X } from "lucide-react";
-import { useDashboard } from "./DashboardContext";
-import FamilyTree from "./FamilyTree";
-import PrintA0View from "./PrintA0View";
-import AdminPrintConfig from "./AdminPrintConfig";
+import { useDashboard } from "@/components/DashboardContext";
+import DashboardMemberList from "@/components/DashboardMemberList";
+import DashboardMembersBranchGenerationList from "@/components/DashboardMembersBranchGenerationList";
+import FamilyTree from "@/components/FamilyTree";
+import MindmapTree from "@/components/MindmapTree";
+import RootSelector from "@/components/RootSelector";
+import Introduction from "@/components/Introduction";
+import { Person, Relationship } from "@/types";
+import { useMemo } from "react";
 
-// ĐỊNH NGHĨA INTERFACE ĐẦY ĐỦ - SỬA LỖI MISSING PROPERTIES
 interface DashboardViewsProps {
-  persons: any[];
-  personsMap: Map<string, any>;
-  relationships: any[];
-  roots: any[];
+  persons: Person[];
+  relationships: Relationship[];
   branches: any[];
-  canEdit: boolean;
-  isAdmin: boolean;
-  userEmail?: string;
+  canEdit?: boolean;
 }
 
 export default function DashboardViews({
   persons,
-  personsMap,
   relationships,
-  roots,
   branches,
-  canEdit,
-  isAdmin,
-  userEmail,
+  canEdit = false,
 }: DashboardViewsProps) {
-  // Lấy trạng thái view hiện tại từ Context (ViewToggle điều khiển cái này)
-  const { view, setView } = useDashboard();
-  
-  // State lưu trữ cấu hình in khi Admin thiết lập xong
-  const [printConfig, setPrintConfig] = useState<any>(null);
+  const { view: currentView, rootId } = useDashboard();
 
-  /**
-   * TRƯỜNG HỢP 1: CHẾ ĐỘ XEM TRƯỚC BẢN IN A0 (FULL MÀN HÌNH)
-   * Hiển thị khi view là "print_a0" và đã có cấu hình
-   */
-  if (view === ("print_a0" as any) && printConfig) {
-    return (
-      <div className="fixed inset-0 z-[200] bg-stone-100 overflow-auto flex justify-center py-10 print:p-0 print:bg-white">
-        {/* Thanh công cụ khi xem bản in - Ẩn khi lệnh in thực tế được gọi */}
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[210] flex gap-4 print:hidden">
-          <button 
-            onClick={() => setView("tree" as any)} 
-            className="bg-stone-900 text-white px-6 py-2 rounded-full font-bold shadow-xl flex items-center gap-2 hover:bg-stone-800 transition-all"
-          >
-            <X size={16} /> Thoát
-          </button>
-          <button 
-            onClick={() => window.print()} 
-            className="bg-amber-600 text-white px-6 py-2 rounded-full font-bold shadow-xl flex items-center gap-2 hover:bg-amber-700 transition-all"
-          >
-            <Printer size={16} /> Bắt đầu in A0
-          </button>
-        </div>
+  // Logic tính toán cây gia phả và gốc (Root)
+  const { personsMap, roots, defaultRootId } = useMemo(() => {
+    const pMap = new Map<string, Person>();
+    persons.forEach((p) => pMap.set(p.id, p));
 
-        {/* Component render nội dung cây theo khổ A0 */}
-        <PrintA0View persons={persons} config={printConfig} />
-      </div>
+    const childIds = new Set(
+      relationships
+        .filter(
+          (r) => r.type === "biological_child" || r.type === "adopted_child",
+        )
+        .map((r) => r.person_b),
     );
-  }
 
-  /**
-   * TRƯỜNG HỢP 2: GIAO DIỆN DASHBOARD MẶC ĐỊNH
-   */
+    let finalRootId = rootId;
+
+    if (!finalRootId || !pMap.has(finalRootId)) {
+      const rootsFallback = persons.filter((p) => !childIds.has(p.id));
+      if (rootsFallback.length > 0) {
+        finalRootId = rootsFallback[0].id;
+      } else if (persons.length > 0) {
+        finalRootId = persons[0].id; 
+      }
+    }
+
+    let calculatedRoots: Person[] = [];
+    if (finalRootId && pMap.has(finalRootId)) {
+      calculatedRoots = [pMap.get(finalRootId)!];
+    }
+
+    return {
+      personsMap: pMap,
+      roots: calculatedRoots,
+      defaultRootId: finalRootId,
+    };
+  }, [persons, relationships, rootId]);
+
+  const activeRootId = rootId || defaultRootId;
+
   return (
-    <div className="w-full relative min-h-[70vh]">
-      {/* Dựa trên view để hiển thị các component khác nhau.
-          Ở đây chúng ta ưu tiên Sơ đồ cây (FamilyTree).
+    <>
+      {/* - min-w-0: Ngăn chặn lỗi flexbox đẩy chiều rộng main vượt quá màn hình mobile.
+          - bg-stone-50/50: Tạo nền nhẹ nhàng cho Dashboard.
       */}
-      <FamilyTree 
-        personsMap={personsMap}
-        relationships={relationships}
-        roots={roots}
-        branches={branches}
-        canEdit={canEdit}
-      />
+      <main className="flex-1 bg-stone-50/50 flex flex-col w-full min-w-0 overflow-hidden">
+        
+        {/* KHỐI ĐIỀU KHIỂN CÂY (Chỉ hiện khi xem Sơ đồ/Mindmap) */}
+        {(currentView === "tree" || currentView === "mindmap") &&
+          persons.length > 0 &&
+          activeRootId && (
+            <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-4 pb-2 w-full flex flex-col sm:flex-row flex-wrap items-center sm:justify-between gap-2 relative z-20">
+              <div className="flex items-center gap-2 sm:gap-4 flex-wrap w-full sm:w-auto justify-center sm:justify-start">
+                <RootSelector persons={persons} currentRootId={activeRootId} />
+                <div id="tree-depth-portal" />
+              </div>
+              <div
+                id="tree-toolbar-portal"
+                className="flex items-center gap-2 flex-wrap justify-center"
+              />
+            </div>
+          )}
 
-      {/* POPUP CẤU HÌNH IN (MODAL): 
-          Hiển thị đè lên Dashboard khi Admin nhấn nút "In gia phả A0"
-      */}
-      {view === ("print_config" as any) && (
-        <AdminPrintConfig 
-          onClose={() => setView("tree" as any)}
-          onConfirm={(config) => {
-            setPrintConfig(config);
-            setView("print_a0" as any);
-          }}
-        />
-      )}
+        {/* VIEW: DANH SÁCH THÀNH VIÊN */}
+        {currentView === "list" && (
+          <div className="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8 py-2 sm:py-6 w-full relative z-10 overflow-x-hidden">
+            <DashboardMemberList
+              initialPersons={persons}
+              canEdit={canEdit}
+              totalCount={persons.length}
+            />
+          </div>
+        )}
 
-      {/* CSS ĐẶC BIỆT CHO LỆNH IN CỦA TRÌNH DUYỆT */}
-      <style jsx global>{`
-        @media print {
-          /* Ẩn tất cả các thành phần không cần thiết khi in */
-          .print\:hidden, 
-          nav, 
-          header, 
-          footer,
-          button { 
-            display: none !important; 
-          }
-          
-          body { 
-            background: white !important; 
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: visible !important;
-          }
+        {/* VIEW: LỌC THEO CHI/ĐỜI */}
+        {currentView === "members_filter" && (
+          <div className="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8 py-2 sm:py-6 w-full relative z-10">
+            <DashboardMembersBranchGenerationList persons={persons} />
+          </div>
+        )}
 
-          /* Thiết lập khổ giấy in A0 ngang */
-          @page { 
-            size: A0 landscape; 
-            margin: 0; 
-          }
-        }
-      `}</style>
-    </div>
+        {/* VIEW: GIỚI THIỆU DÒNG HỌ */}
+        {currentView === "introduction" && (
+          <div className="relative pt-2 sm:pt-4">
+            <Introduction />
+          </div>
+        )}
+
+        {/* VIEW: SƠ ĐỒ GIA PHẢ & MINDMAP (Chiếm toàn bộ diện tích còn lại) */}
+        <div className="flex-1 w-full relative z-10 overflow-hidden">
+          {currentView === "tree" && (
+            <FamilyTree
+              personsMap={personsMap}
+              relationships={relationships}
+              branches={branches}
+              roots={roots}
+              canEdit={canEdit}
+            />
+          )}
+          {currentView === "mindmap" && (
+            <MindmapTree
+              personsMap={personsMap}
+              relationships={relationships}
+              branches={branches}
+              roots={roots}
+              canEdit={canEdit}
+            />
+          )}
+        </div>
+      </main>
+    </>
   );
 }
