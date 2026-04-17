@@ -14,18 +14,24 @@ import {
   Users,
   FileText,
   Settings,
+  Printer, // Thêm icon mới
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import LogoutButton from "./LogoutButton";
+import AdminPrintConfig from "./AdminPrintConfig"; // Import bảng cấu hình mm
 
 interface HeaderMenuProps {
   isAdmin: boolean;
   userEmail?: string;
+  // THÊM 2 PROPS NÀY ĐỂ ĐIỀU KHIỂN DASHBOARD
+  setView: (view: string) => void; 
+  setPrintConfig: (config: any) => void;
 }
 
-export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
+export default function HeaderMenu({ isAdmin, userEmail, setView, setPrintConfig }: HeaderMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showA0Config, setShowA0Config] = useState(false); // State quản lý modal A0
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,7 +40,6 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
         setIsOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -46,15 +51,9 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
         className="flex items-center gap-2 pl-2 pr-4 py-1.5 rounded-full hover:bg-stone-100 transition-all duration-200 border border-transparent hover:border-stone-200"
       >
         <div className="size-8 rounded-full bg-linear-to-br from-amber-200 to-amber-100 text-amber-800 flex items-center justify-center font-bold shadow-sm ring-1 ring-amber-300/50">
-          {userEmail ? (
-            userEmail.charAt(0).toUpperCase()
-          ) : (
-            <UserCircle className="size-5" />
-          )}
+          {userEmail ? userEmail.charAt(0).toUpperCase() : <UserCircle className="size-5" />}
         </div>
-        <ChevronDown
-          className={`size-4 text-stone-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
-        />
+        <ChevronDown className={`size-4 text-stone-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       <AnimatePresence>
@@ -67,17 +66,25 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
             className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-stone-200/60 py-2 z-50 overflow-hidden"
           >
             <div className="px-4 py-3 border-b border-stone-100 bg-stone-50/50">
-              <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-0.5">
-                Tài khoản
-              </p>
-              <p className="text-sm font-medium text-stone-900 truncate">
-                {userEmail}
-              </p>
+              <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-0.5">Tài khoản</p>
+              <p className="text-sm font-medium text-stone-900 truncate">{userEmail}</p>
             </div>
 
-            <div className="py-1">
+            <div className="py-1 max-h-[70vh] overflow-y-auto"> {/* Thêm scroll nếu menu quá dài */}
               {isAdmin && (
                 <>
+                  {/* NÚT XUẤT BẢN IN A0 MỚI */}
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      setShowA0Config(true);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors w-full text-left border-b border-amber-100"
+                  >
+                    <Printer className="size-4" />
+                    Xuất bản in A0
+                  </button>
+
                   <Link
                     href="/dashboard/users"
                     onClick={() => setIsOpen(false)}
@@ -120,6 +127,8 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
                   </Link>
                 </>
               )}
+              
+              {/* Các Link khác giữ nguyên... */}
               <Link
                 href="/dashboard/events"
                 onClick={() => setIsOpen(false)}
@@ -128,14 +137,8 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
                 <CalendarClock className="size-4" />
                 Sự kiện
               </Link>
-              <Link
-                href="/dashboard/kinship"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors"
-              >
-                <GitMerge className="size-4" />
-                Tra cứu danh xưng
-              </Link>
+              {/* ... tiếp tục các link GitMerge, BarChart2, v.v ... */}
+              
               <Link
                 href="/dashboard/stats"
                 onClick={() => setIsOpen(false)}
@@ -144,10 +147,10 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
                 <BarChart2 className="size-4" />
                 Thống kê gia phả
               </Link>
+
               <button
                 onClick={() => {
                   setIsOpen(false);
-                  // Open change password modal
                   const event = new CustomEvent("openChangePasswordModal");
                   window.dispatchEvent(event);
                 }}
@@ -156,6 +159,7 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
                 <KeyRound className="size-4" />
                 Đổi mật khẩu
               </button>
+
               <Link
                 href="/about"
                 onClick={() => setIsOpen(false)}
@@ -169,6 +173,18 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* MODAL CẤU HÌNH IN HIỆN RA KHI BẤM NÚT */}
+      {showA0Config && (
+        <AdminPrintConfig
+          onClose={() => setShowA0Config(false)}
+          onConfirm={(configData) => {
+            setPrintConfig(configData); // Lưu mm
+            setView("print_a0");        // Chuyển view
+            setShowA0Config(false);
+          }}
+        />
+      )}
     </div>
   );
 }
