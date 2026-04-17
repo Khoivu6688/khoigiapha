@@ -1,138 +1,103 @@
 "use client";
 
-import { useDashboard } from "@/components/DashboardContext";
-import DashboardMemberList from "@/components/DashboardMemberList";
-import DashboardMembersBranchGenerationList from "@/components/DashboardMembersBranchGenerationList";
-import FamilyTree from "@/components/FamilyTree";
-import MindmapTree from "@/components/MindmapTree";
-import RootSelector from "@/components/RootSelector";
-import Introduction from "@/components/Introduction";
-import { Person, Relationship } from "@/types";
-import { useMemo } from "react";
+import React, { useState } from "react";
+import { Printer } from "lucide-react"; // Đảm bảo import icon này
+import PrintA0View from "./PrintA0View";
+import TreeView from "./TreeView"; 
+import ListView from "./ListView"; 
+import HeaderMenu from "./HeaderMenu"; // Import HeaderMenu để kết nối
 
 interface DashboardViewsProps {
-  persons: Person[];
-  relationships: Relationship[];
-  branches: any[];
-  canEdit?: boolean;
+  persons: any[];
+  isAdmin: boolean;
+  userEmail?: string; // Thêm để truyền vào HeaderMenu
 }
 
-export default function DashboardViews({
-  persons,
-  relationships,
-  branches,
-  canEdit = false,
-}: DashboardViewsProps) {
-  const { view: currentView, rootId } = useDashboard();
+export default function DashboardViews({ persons, isAdmin, userEmail }: DashboardViewsProps) {
+  // Quản lý trạng thái view hiển thị
+  const [view, setView] = useState("tree");
+  // Lưu trữ cấu hình mm từ AdminPrintConfig truyền qua HeaderMenu
+  const [printConfig, setPrintConfig] = useState<any>(null);
 
-  // Logic tính toán cây gia phả và gốc (Root)
-  const { personsMap, roots, defaultRootId } = useMemo(() => {
-    const pMap = new Map<string, Person>();
-    persons.forEach((p) => pMap.set(p.id, p));
+  // Hàm render view tương ứng dựa trên trạng thái 'view'
+  const renderCurrentView = () => {
+    switch (view) {
+      case "print_a0":
+        return (
+          <div className="relative w-full h-screen bg-stone-200 overflow-auto">
+            {/* Thanh điều khiển nổi dành cho chế độ xem trước bản in */}
+            <div className="fixed top-6 left-6 z-[100] flex gap-3 print:hidden animate-in fade-in slide-in-from-left-4 duration-300">
+              <button 
+                onClick={() => setView("tree")}
+                className="bg-black text-white px-6 py-2.5 rounded-full font-bold shadow-2xl hover:bg-stone-800 transition-all flex items-center gap-2"
+              >
+                <span>←</span> Thoát chế độ in
+              </button>
+              
+              <button 
+                onClick={() => window.print()}
+                className="bg-amber-600 text-white px-6 py-2.5 rounded-full font-bold shadow-2xl hover:bg-amber-700 transition-all flex items-center gap-2"
+              >
+                <Printer className="size-4" /> 
+                In ra File PDF (A0)
+              </button>
+            </div>
+            
+            {/* Component hiển thị tờ giấy A0 vật lý */}
+            <div className="flex justify-center py-12 print:p-0">
+               <PrintA0View persons={persons} config={printConfig} />
+            </div>
+          </div>
+        );
 
-    const childIds = new Set(
-      relationships
-        .filter(
-          (r) => r.type === "biological_child" || r.type === "adopted_child",
-        )
-        .map((r) => r.person_b),
-    );
-
-    let finalRootId = rootId;
-
-    if (!finalRootId || !pMap.has(finalRootId)) {
-      const rootsFallback = persons.filter((p) => !childIds.has(p.id));
-      if (rootsFallback.length > 0) {
-        finalRootId = rootsFallback[0].id;
-      } else if (persons.length > 0) {
-        finalRootId = persons[0].id; 
-      }
+      case "list":
+        return <ListView persons={persons} />;
+      
+      case "tree":
+      default:
+        // Cần đảm bảo component TreeView của bạn có thể nhận props persons
+        return <TreeView persons={persons} />;
     }
-
-    let calculatedRoots: Person[] = [];
-    if (finalRootId && pMap.has(finalRootId)) {
-      calculatedRoots = [pMap.get(finalRootId)!];
-    }
-
-    return {
-      personsMap: pMap,
-      roots: calculatedRoots,
-      defaultRootId: finalRootId,
-    };
-  }, [persons, relationships, rootId]);
-
-  const activeRootId = rootId || defaultRootId;
+  };
 
   return (
-    <>
-      {/* - min-w-0: Ngăn chặn lỗi flexbox đẩy chiều rộng main vượt quá màn hình mobile.
-          - bg-stone-50/50: Tạo nền nhẹ nhàng cho Dashboard.
+    <div className="w-full min-h-screen relative">
+      {/* HeaderMenu được đặt cố định ở góc phải.
+         Dùng z-50 để luôn nổi trên các View thông thường, 
+         nhưng ẩn đi bằng 'print:hidden' khi thực hiện lệnh in.
       */}
-      <main className="flex-1 bg-stone-50/50 flex flex-col w-full min-w-0 overflow-hidden">
-        
-        {/* KHỐI ĐIỀU KHIỂN CÂY (Chỉ hiện khi xem Sơ đồ/Mindmap) */}
-        {(currentView === "tree" || currentView === "mindmap") &&
-          persons.length > 0 &&
-          activeRootId && (
-            <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-4 pb-2 w-full flex flex-col sm:flex-row flex-wrap items-center sm:justify-between gap-2 relative z-20">
-              <div className="flex items-center gap-2 sm:gap-4 flex-wrap w-full sm:w-auto justify-center sm:justify-start">
-                <RootSelector persons={persons} currentRootId={activeRootId} />
-                <div id="tree-depth-portal" />
-              </div>
-              <div
-                id="tree-toolbar-portal"
-                className="flex items-center gap-2 flex-wrap justify-center"
-              />
-            </div>
-          )}
+      <div className="fixed top-4 right-4 z-50 print:hidden">
+        <HeaderMenu 
+          isAdmin={isAdmin} 
+          userEmail={userEmail}
+          setView={setView} 
+          setPrintConfig={setPrintConfig} 
+        />
+      </div>
 
-        {/* VIEW: DANH SÁCH THÀNH VIÊN */}
-        {currentView === "list" && (
-          <div className="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8 py-2 sm:py-6 w-full relative z-10 overflow-x-hidden">
-            <DashboardMemberList
-              initialPersons={persons}
-              canEdit={canEdit}
-              totalCount={persons.length}
-            />
-          </div>
-        )}
-
-        {/* VIEW: LỌC THEO CHI/ĐỜI */}
-        {currentView === "members_filter" && (
-          <div className="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8 py-2 sm:py-6 w-full relative z-10">
-            <DashboardMembersBranchGenerationList persons={persons} />
-          </div>
-        )}
-
-        {/* VIEW: GIỚI THIỆU DÒNG HỌ */}
-        {currentView === "introduction" && (
-          <div className="relative pt-2 sm:pt-4">
-            <Introduction />
-          </div>
-        )}
-
-        {/* VIEW: SƠ ĐỒ GIA PHẢ & MINDMAP (Chiếm toàn bộ diện tích còn lại) */}
-        <div className="flex-1 w-full relative z-10 overflow-hidden">
-          {currentView === "tree" && (
-            <FamilyTree
-              personsMap={personsMap}
-              relationships={relationships}
-              branches={branches}
-              roots={roots}
-              canEdit={canEdit}
-            />
-          )}
-          {currentView === "mindmap" && (
-            <MindmapTree
-              personsMap={personsMap}
-              relationships={relationships}
-              branches={branches}
-              roots={roots}
-              canEdit={canEdit}
-            />
-          )}
-        </div>
+      {/* Vùng chứa nội dung chính */}
+      <main className="w-full">
+        {renderCurrentView()}
       </main>
-    </>
+
+      {/* Style bổ sung để ép khổ in (Print CSS) */}
+      <style jsx global>{`
+        @media print {
+          body {
+            margin: 0;
+            padding: 0;
+            background: white;
+          }
+          @page {
+            size: A0 landscape;
+            margin: 0;
+          }
+          /* Ẩn tất cả các thành phần không cần thiết khác khi in */
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
+    </div>
   );
 }
