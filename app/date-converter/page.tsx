@@ -76,7 +76,7 @@ export default function DateConverter() {
         "Tuất",
         "Hợi",
       ];
-      const zodiacYear = animals[lunar.getYear() % 12];
+      const zodiacYear = animals[(lunar.getYear()+8) % 12];
 
       // Simple can chi calculation
       const gan = [
@@ -105,7 +105,7 @@ export default function DateConverter() {
         "Tuất",
         "Hợi",
       ];
-      const yearCanChi = `${gan[(lunar.getYear() - 4) % 10]} ${
+      const yearCanChi = `${gan[(lunar.getYear() +6 ) % 10]} ${
         chi[(lunar.getYear()+8) % 12]
       }`;
 
