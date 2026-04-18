@@ -106,7 +106,7 @@ export default function DateConverter() {
         "Hợi",
       ];
       const yearCanChi = `${gan[(lunar.getYear() - 4) % 10]} ${
-        chi[lunar.getYear() % 12]
+        chi[(lunar.getYear()+8) % 12]
       }`;
 
       result.dayInfo = {
