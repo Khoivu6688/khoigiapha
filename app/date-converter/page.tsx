@@ -33,7 +33,7 @@ export default function DateConverter() {
         solarDate.day
       );
 
-      const lunar: any = solar.getLunar(); // ✅ FIX TS
+      const lunar: any = solar.getLunar(); // FIX TS instance
 
       const currentDate = new Date(
         solarDate.year,
@@ -67,13 +67,10 @@ export default function DateConverter() {
         solarInput: solarDate,
 
         dayInfo: {
-          // ✅ dùng lib chuẩn
           canChiYear: lunar.getYearInGanZhi(),
           canChiMonth: lunar.getMonthInGanZhi(),
           canChiDay: lunar.getDayInGanZhi(),
-
           zodiacYear: lunar.getYearShengXiao(),
-
           weekOfYear,
           dayName: dayNames[currentDate.getDay()],
         },
@@ -91,11 +88,11 @@ export default function DateConverter() {
   // =========================
   const handleLunarToSolar = () => {
     try {
-      const lunar: any = Lunar.fromYmd(
+      const lunar = (Lunar as any).fromYmd(
         lunarDate.year,
         lunarDate.leap ? -lunarDate.month : lunarDate.month,
         lunarDate.day
-      ); // ✅ FIX TS
+      ); // FIX TS static
 
       const solar = lunar.getSolar();
 
@@ -123,7 +120,6 @@ export default function DateConverter() {
           canChiYear: lunar.getYearInGanZhi(),
           canChiMonth: lunar.getMonthInGanZhi(),
           canChiDay: lunar.getDayInGanZhi(),
-
           zodiacYear: lunar.getYearShengXiao(),
           weekOfYear,
         },
@@ -174,7 +170,7 @@ export default function DateConverter() {
           </h1>
         </div>
 
-        {/* ===== DƯƠNG → ÂM ===== */}
+        {/* DƯƠNG → ÂM */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
           <button
             onClick={handleSolarToLunar}
@@ -197,7 +193,7 @@ export default function DateConverter() {
           )}
         </div>
 
-        {/* ===== ÂM → DƯƠNG ===== */}
+        {/* ÂM → DƯƠNG */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <button
             onClick={handleLunarToSolar}
