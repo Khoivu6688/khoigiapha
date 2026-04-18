@@ -210,7 +210,7 @@ export default function DateConverter() {
         "Tuất",
         "Hợi",
       ];
-      const zodiacYear = animals[lunarDate.year % 12];
+      const zodiacYear = animals[(lunarDate.year + 8 ) % 12];
 
       // Can chi for lunar year
       const gan = [
@@ -239,8 +239,8 @@ export default function DateConverter() {
         "Tuất",
         "Hợi",
       ];
-      const yearCanChi = `${gan[(lunarDate.year - 4) % 10]} ${
-        chi[lunarDate.year % 12]
+      const yearCanChi = `${gan[(lunarDate.year + 6) % 10]} ${
+        chi[(lunarDate.year +8 ) % 12]
       }`;
 
       result.dayInfo = {
