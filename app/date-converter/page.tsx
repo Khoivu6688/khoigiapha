@@ -23,7 +23,7 @@ export default function DateConverter() {
   const [solarResult, setSolarResult] = useState<any>(null);
 
   // =========================
-  // DƯƠNG → ÂM (FIX CAN CHI)
+  // DƯƠNG → ÂM
   // =========================
   const handleSolarToLunar = () => {
     try {
@@ -33,7 +33,7 @@ export default function DateConverter() {
         solarDate.day
       );
 
-      const lunar = solar.getLunar();
+      const lunar: any = solar.getLunar(); // ✅ FIX TS
 
       const currentDate = new Date(
         solarDate.year,
@@ -67,7 +67,7 @@ export default function DateConverter() {
         solarInput: solarDate,
 
         dayInfo: {
-          // ✅ DÙNG LIB (CHUẨN)
+          // ✅ dùng lib chuẩn
           canChiYear: lunar.getYearInGanZhi(),
           canChiMonth: lunar.getMonthInGanZhi(),
           canChiDay: lunar.getDayInGanZhi(),
@@ -87,15 +87,15 @@ export default function DateConverter() {
   };
 
   // =========================
-  // ÂM → DƯƠNG (FIX LOGIC)
+  // ÂM → DƯƠNG
   // =========================
   const handleLunarToSolar = () => {
     try {
-      const lunar = Lunar.fromYmd(
+      const lunar: any = Lunar.fromYmd(
         lunarDate.year,
         lunarDate.leap ? -lunarDate.month : lunarDate.month,
         lunarDate.day
-      );
+      ); // ✅ FIX TS
 
       const solar = lunar.getSolar();
 
@@ -120,7 +120,6 @@ export default function DateConverter() {
         lunarInput: lunarDate,
 
         dayInfo: {
-          // ✅ CHUẨN
           canChiYear: lunar.getYearInGanZhi(),
           canChiMonth: lunar.getMonthInGanZhi(),
           canChiDay: lunar.getDayInGanZhi(),
@@ -168,6 +167,7 @@ export default function DateConverter() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8 px-4">
       <div className="max-w-6xl mx-auto">
+
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
             Chuyển đổi Dương - Âm lịch
@@ -184,7 +184,7 @@ export default function DateConverter() {
           </button>
 
           {lunarResult && (
-            <div className="mt-6">
+            <div className="mt-6 space-y-1">
               <h3 className="text-xl font-bold">
                 {formatDate(lunarResult)}
               </h3>
@@ -207,7 +207,7 @@ export default function DateConverter() {
           </button>
 
           {solarResult && (
-            <div className="mt-6">
+            <div className="mt-6 space-y-1">
               <h3 className="text-xl font-bold">
                 {formatDate(solarResult)}
               </h3>
@@ -219,6 +219,7 @@ export default function DateConverter() {
             </div>
           )}
         </div>
+
       </div>
     </div>
   );
