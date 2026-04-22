@@ -7,11 +7,6 @@ import { cookies } from "next/headers";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-/**
- * Payload shape cho file backup JSON.
- * Các field DB-managed (created_at, updated_at) được giữ để tham khảo
- * nhưng sẽ bị loại bỏ khi import lại.
- */
 interface PersonExport {
   id: string;
   full_name: string;
@@ -29,7 +24,6 @@ interface PersonExport {
   other_names: string | null;
   avatar_url: string | null;
   note: string | null;
-  // DB-managed fields (kept in export for traceability, stripped on import)
   created_at?: string;
   updated_at?: string;
 }
@@ -73,7 +67,6 @@ async function verifyAdmin() {
   return supabase;
 }
 
-// Các field được phép insert vào bảng persons (loại bỏ created_at/updated_at)
 function sanitizePerson(
   p: PersonExport,
 ): Omit<PersonExport, "created_at" | "updated_at"> {
@@ -116,8 +109,6 @@ export async function exportData(
   if ("error" in supabaseResult) return supabaseResult;
   const supabase = supabaseResult;
 
-  // Fetch ALL persons and relationships first to perform traversal in memory.
-  // This is safe since typical family trees are < 10,000 nodes, easily fitting in memory.
   const { data: allPersons, error: personsError } = await supabase
     .from("persons")
     .select(
@@ -141,11 +132,9 @@ export async function exportData(
   let exportPersons = (allPersons ?? []) as PersonExport[];
   let exportRels = (allRels ?? []) as RelationshipExport[];
 
-  // If a root person is selected, filter the export to only their subtree
   if (exportRootId && exportPersons.some((p) => p.id === exportRootId)) {
     const includedPersonIds = new Set<string>([exportRootId]);
 
-    // 1. Traverse biological and adopted children recursively
     const findDescendants = (parentId: string) => {
       exportRels
         .filter(
@@ -162,8 +151,7 @@ export async function exportData(
     };
     findDescendants(exportRootId);
 
-    // 2. Add spouses for everyone in the tree so far
-    const descendantsArray = Array.from(includedPersonIds); // snapshot current members
+    const descendantsArray = Array.from(includedPersonIds);
     descendantsArray.forEach((personId) => {
       exportRels
         .filter(
@@ -177,7 +165,6 @@ export async function exportData(
         });
     });
 
-    // 3. Filter the payload
     exportPersons = exportPersons.filter((p) => includedPersonIds.has(p.id));
     exportRels = exportRels.filter(
       (r) =>
@@ -186,7 +173,7 @@ export async function exportData(
   }
 
   return {
-    version: 2, // bumped for schema with birth_order + generation
+    version: 2,
     timestamp: new Date().toISOString(),
     persons: exportPersons,
     relationships: exportRels,
@@ -211,13 +198,7 @@ export async function importData(
     return { error: "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại file JSON." };
   }
 
-  if (importPayload.persons.length === 0) {
-    return {
-      error: "File backup trống — không có thành viên nào để phục hồi.",
-    };
-  }
-
-  // 1. Xoá relationships trước (FK constraint)
+  // 1. Xoá relationships trước để tránh lỗi khóa ngoại khi xoá persons
   const { error: delRelError } = await supabase
     .from("relationships")
     .delete()
@@ -226,7 +207,18 @@ export async function importData(
   if (delRelError)
     return { error: "Lỗi khi xoá relationships cũ: " + delRelError.message };
 
-  // 2. Xoá persons
+  // 2. Xoá bảng chi tiết cá nhân (Quan trọng: Giải quyết lệch thống kê)
+  // Chúng ta xoá tất cả bản ghi có person_id không phải null
+  const { error: delPrivateError } = await supabase
+    .from("person_details_private")
+    .delete()
+    .neq("person_id", "00000000-0000-0000-0000-000000000000");
+
+  if (delPrivateError) {
+    console.warn("Lưu ý: Bảng chi tiết có thể đã trống hoặc lỗi nhẹ:", delPrivateError.message);
+  }
+
+  // 3. Xoá bảng persons
   const { error: delPersonsError } = await supabase
     .from("persons")
     .delete()
@@ -235,7 +227,7 @@ export async function importData(
   if (delPersonsError)
     return { error: "Lỗi khi xoá persons cũ: " + delPersonsError.message };
 
-  // 3. Insert persons (sanitized — chỉ giữ các field schema hiện tại)
+  // 4. Insert persons (sanitized)
   const CHUNK = 200;
   const persons = importPayload.persons.map(sanitizePerson);
 
@@ -248,7 +240,7 @@ export async function importData(
       };
   }
 
-  // 4. Insert relationships (stripped of id/created_at to avoid conflicts)
+  // 5. Insert relationships
   const relationships = importPayload.relationships.map(sanitizeRelationship);
 
   for (let i = 0; i < relationships.length; i += CHUNK) {
@@ -260,6 +252,7 @@ export async function importData(
       };
   }
 
+  // 6. Làm mới cache
   revalidatePath("/");
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/data");
