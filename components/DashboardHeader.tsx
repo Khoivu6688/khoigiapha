@@ -82,7 +82,7 @@ export default function DashboardHeader({
               <img
                 src="/assets/images/banerds.jpg"
                 alt="LOGO"
-                /* h-12 trên mobile (~48px) và h-20 trên PC (~80px) */
+                /* h-14 trên mobile (~48px) và h-22 trên PC (~80px) */
                 className="h-12 sm:h-20 w-auto max-w-full object-contain transition-all"
               />
             </Link>
